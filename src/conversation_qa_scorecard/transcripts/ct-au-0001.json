@@ -1,0 +1,87 @@
+{
+  "notes": "SYNTHETIC. Every party, agent, contact reference and identifier below is invented. Parties are marked (FICTIONAL), addresses use .example domains and RFC 5737 / RFC 3849 literals, and no real customer, institution or conversation is represented.",
+  "headline": "Non-compliant: significant exclusions were never explained before the sale.",
+  "contact": {
+    "contact_id": "CT-AU-0001",
+    "tenant": "demo-bank",
+    "market": "AU",
+    "product": "general_insurance_sales",
+    "declared_requirement_ids": [
+      "AU-DISC-COLLECTION",
+      "AU-DISC-EXCLUSIONS",
+      "AU-DISC-COOLING-OFF",
+      "AU-DISC-DISPUTE",
+      "AU-SCRIPT-SALE-ORDER"
+    ],
+    "agent_id": "agent-2208 (FICTIONAL)",
+    "channel": "voice",
+    "audio_uri": "synthetic://recordings/CT-AU-0001.wav",
+    "locale": "en-AU"
+  },
+  "contact_id": "CT-AU-0001",
+  "transcript_id": "tr-au-0001",
+  "locale": "en-AU",
+  "engine": "offline-fixture",
+  "word_timing": "even",
+  "started_at": "2026-07-14T02:15:00+00:00",
+  "ended_at": "2026-07-14T02:24:00+00:00",
+  "audio_duration_ms": 68000,
+  "turns": [
+    {
+      "speaker_id": "agent-2208 (FICTIONAL)",
+      "role": "agent",
+      "text": "Good afternoon, Southern Cross Mutual (FICTIONAL) here. Just so you know, we collect your personal information to give you a quote.",
+      "start_ms": 0,
+      "end_ms": 12000,
+      "channel": 0
+    },
+    {
+      "speaker_id": "agent-2208 (FICTIONAL)",
+      "role": "agent",
+      "text": "Let me explain what this policy covers: the building, the contents and temporary accommodation.",
+      "start_ms": 12000,
+      "end_ms": 26000,
+      "channel": 0
+    },
+    {
+      "speaker_id": "caller-1",
+      "role": "customer",
+      "text": "We lost the house in the bushfire last summer, so I want to be sure this time.",
+      "start_ms": 26000,
+      "end_ms": 35000,
+      "channel": 1
+    },
+    {
+      "speaker_id": "agent-2208 (FICTIONAL)",
+      "role": "agent",
+      "text": "Understood. There is a cooling off period of fourteen days if you change your mind.",
+      "start_ms": 35000,
+      "end_ms": 46000,
+      "channel": 0
+    },
+    {
+      "speaker_id": "agent-2208 (FICTIONAL)",
+      "role": "agent",
+      "text": "Are you happy to proceed with the policy?",
+      "start_ms": 46000,
+      "end_ms": 52000,
+      "channel": 0
+    },
+    {
+      "speaker_id": "caller-1",
+      "role": "customer",
+      "text": "Yes, set it up.",
+      "start_ms": 52000,
+      "end_ms": 55000,
+      "channel": 1
+    },
+    {
+      "speaker_id": "agent-2208 (FICTIONAL)",
+      "role": "agent",
+      "text": "Thank you. If you are unhappy you can complain to us through our internal dispute resolution process.",
+      "start_ms": 55000,
+      "end_ms": 68000,
+      "channel": 0
+    }
+  ]
+}

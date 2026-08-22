@@ -1,0 +1,77 @@
+{
+  "notes": "SYNTHETIC. Every party, agent, contact reference and identifier below is invented. Parties are marked (FICTIONAL), addresses use .example domains and RFC 5737 / RFC 3849 literals, and no real customer, institution or conversation is represented.",
+  "headline": "Compliant, in Japanese: matching runs over the character run, not over spaces.",
+  "contact": {
+    "contact_id": "CT-JP-0001",
+    "tenant": "demo-bank",
+    "market": "JP",
+    "product": "retail_investment_advice",
+    "declared_requirement_ids": [
+      "JP-DISC-RECORDING",
+      "JP-DISC-RISK",
+      "JP-SCRIPT-SOLICITATION-ORDER"
+    ],
+    "agent_id": "agent-3391 (FICTIONAL)",
+    "channel": "voice",
+    "audio_uri": "synthetic://recordings/CT-JP-0001.wav",
+    "locale": "ja-JP"
+  },
+  "contact_id": "CT-JP-0001",
+  "transcript_id": "tr-jp-0001",
+  "locale": "ja-JP",
+  "engine": "offline-fixture",
+  "word_timing": "even",
+  "started_at": "2026-07-14T02:15:00+00:00",
+  "ended_at": "2026-07-14T02:24:00+00:00",
+  "audio_duration_ms": 56000,
+  "turns": [
+    {
+      "speaker_id": "agent-3391 (FICTIONAL)",
+      "role": "agent",
+      "text": "おはようございます。メリディアン信託銀行（架空）でございます。この通話は録音されています。",
+      "start_ms": 0,
+      "end_ms": 12000,
+      "channel": 0
+    },
+    {
+      "speaker_id": "agent-3391 (FICTIONAL)",
+      "role": "agent",
+      "text": "本日ご案内する投資信託につきましては、元本割れのリスクがありますのでご了承ください。",
+      "start_ms": 12000,
+      "end_ms": 26000,
+      "channel": 0
+    },
+    {
+      "speaker_id": "agent-3391 (FICTIONAL)",
+      "role": "agent",
+      "text": "また、販売手数料と信託報酬として手数料がかかります。",
+      "start_ms": 26000,
+      "end_ms": 38000,
+      "channel": 0
+    },
+    {
+      "speaker_id": "caller-1",
+      "role": "customer",
+      "text": "よく分かりました。ありがとうございます。",
+      "start_ms": 38000,
+      "end_ms": 44000,
+      "channel": 1
+    },
+    {
+      "speaker_id": "agent-3391 (FICTIONAL)",
+      "role": "agent",
+      "text": "それでは、お手続きを進めてよろしいでしょうか。",
+      "start_ms": 44000,
+      "end_ms": 52000,
+      "channel": 0
+    },
+    {
+      "speaker_id": "caller-1",
+      "role": "customer",
+      "text": "はい、お願いします。",
+      "start_ms": 52000,
+      "end_ms": 56000,
+      "channel": 1
+    }
+  ]
+}

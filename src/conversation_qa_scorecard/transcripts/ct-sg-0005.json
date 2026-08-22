@@ -1,0 +1,112 @@
+{
+  "notes": "SYNTHETIC. Every party, agent, contact reference and identifier below is invented. Parties are marked (FICTIONAL), addresses use .example domains and RFC 5737 / RFC 3849 literals, and no real customer, institution or conversation is represented.",
+  "headline": "Unverifiable: the recogniser produced no word timings, so no deadline can be checked.",
+  "contact": {
+    "contact_id": "CT-SG-0005",
+    "tenant": "demo-bank",
+    "market": "SG",
+    "product": "retail_investment_advice",
+    "declared_requirement_ids": [
+      "SG-DISC-RECORDING",
+      "SG-DISC-IDENTITY",
+      "SG-DISC-RISK",
+      "SG-DISC-FEES",
+      "SG-SCRIPT-ADVICE-ORDER",
+      "SG-DISC-COMPLAINT"
+    ],
+    "agent_id": "agent-1174 (FICTIONAL)",
+    "channel": "voice",
+    "audio_uri": "synthetic://recordings/CT-SG-0005.wav",
+    "locale": "en-SG"
+  },
+  "contact_id": "CT-SG-0005",
+  "transcript_id": "tr-sg-0005",
+  "locale": "en-SG",
+  "engine": "offline-fixture",
+  "word_timing": "declared",
+  "started_at": "2026-07-14T02:15:00+00:00",
+  "ended_at": "2026-07-14T02:24:00+00:00",
+  "audio_duration_ms": 240000,
+  "turns": [
+    {
+      "speaker_id": "agent-1174 (FICTIONAL)",
+      "role": "agent",
+      "text": "Good morning, you are through to Meridian Trust Bank (FICTIONAL). Please note this call may be recorded for quality and training purposes.",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 0
+    },
+    {
+      "speaker_id": "agent-1174 (FICTIONAL)",
+      "role": "agent",
+      "text": "Before we go any further, could you confirm your date of birth for me please?",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 0
+    },
+    {
+      "speaker_id": "caller-1",
+      "role": "customer",
+      "text": "Yes, of course.",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 1
+    },
+    {
+      "speaker_id": "agent-1174 (FICTIONAL)",
+      "role": "agent",
+      "text": "Thank you. The purpose of this call is to review the balanced income fund you asked us about last week.",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 0
+    },
+    {
+      "speaker_id": "agent-1174 (FICTIONAL)",
+      "role": "agent",
+      "text": "I must tell you that the value of your investment can go down as well as up, and you may get back less than you invested.",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 0
+    },
+    {
+      "speaker_id": "agent-1174 (FICTIONAL)",
+      "role": "agent",
+      "text": "I should also set out the fees and charges that apply: a sales charge of up to five per cent, and an annual management fee.",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 0
+    },
+    {
+      "speaker_id": "caller-1",
+      "role": "customer",
+      "text": "That is very helpful, thank you for explaining.",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 1
+    },
+    {
+      "speaker_id": "agent-1174 (FICTIONAL)",
+      "role": "agent",
+      "text": "Are you happy to proceed with the application today?",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 0
+    },
+    {
+      "speaker_id": "caller-1",
+      "role": "customer",
+      "text": "Yes, that sounds fine.",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 1
+    },
+    {
+      "speaker_id": "agent-1174 (FICTIONAL)",
+      "role": "agent",
+      "text": "Thank you. If anything is not right, you can raise a complaint at any time and we will look into it.",
+      "start_ms": null,
+      "end_ms": null,
+      "channel": 0
+    }
+  ]
+}

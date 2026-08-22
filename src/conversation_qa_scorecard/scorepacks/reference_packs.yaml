@@ -1,0 +1,528 @@
+# E3 conversation-QA score pack (market-parameterised CONFIG, never engine code).
+#
+# This file is the reference pack. It is the ONLY place that knows what a recording notice
+# sounds like, which speaker has to say it, how soon, in what order, what an unmet one costs,
+# and which words evidence customer vulnerability. The scoring engine knows none of it: hand it
+# a different pack and it scores a different market with no code change.
+#
+# Per market it carries:
+#
+#   * `phrases`      the named steps, each with the REQUIRED wording plus the acceptable
+#                    paraphrases a QA team has approved. Matching is deterministic and
+#                    locale-sensitive (speech-lexicon-kit); no model is involved.
+#   * `requirements` the obligations: which steps, by which speaker, in which ORDER, inside
+#                    which timing window, at which severity, citing which instrument.
+#   * `cues`         the per-vertical sentiment and vulnerability lexicons. They live HERE and
+#                    not in the shared speech kernel, because which words evidence financial
+#                    hardship in a retail-banking call is reviewed vertical policy on a
+#                    per-market schedule, and changing one must not need a release of a shared
+#                    package that five other systems also install.
+#
+# Two kinds of content live here and they are different things:
+#
+#   * The INSTRUMENTS in `citations` are real, named regulator publications. Nothing in this
+#     repo is legal advice, and no snippet is a verbatim quotation; each is a short paraphrase
+#     so a reviewer can find the source. `url` is deliberately blank: adopters point these at
+#     their own subscription or regulator links. This is the ONE place in the repo where real
+#     names appear, and it is the same convention the sibling rule packs use, because a
+#     citation that cannot be named is worthless to a compliance officer.
+#   * The SEVERITIES, TIMING WINDOWS and ACCEPTED PARAPHRASES are ADOPTER-OWNED POLICY, not
+#     quoted regulatory limits. They ship as this reference and a bank tightens its own QA
+#     policy by editing this file, or by pointing `score_packs.pack_path` at its own, never by
+#     editing the engine (practice B4).
+#
+# Everything else in this repo (contacts, transcripts, parties, identifiers) is obviously
+# fictional synthetic data: no real customer, counterparty, agent or conversation appears.
+
+version: "2026-08-08"
+
+# --------------------------------------------------------------------------- #
+# Regulator instruments cited by the requirements and cue families below.
+# --------------------------------------------------------------------------- #
+citations:
+  sg_mas_fair_dealing:
+    title: >-
+      MAS Guidelines on Fair Dealing (FSG-G04), Board and Senior Management Responsibilities
+      for Delivering Fair Dealing Outcomes to Customers
+    source_type: guideline
+    published_date: "2024-05-30"
+    snippet: >-
+      Monetary Authority of Singapore guidelines on fair dealing: customers must receive clear,
+      relevant and timely information to make informed financial decisions, and representatives
+      must disclose the nature, risks and costs of a product before the customer commits.
+  sg_pdpa_recording:
+    title: "Personal Data Protection Act 2012 (Singapore), sections 13 to 20 (consent and notification)"
+    source_type: regulation
+    published_date: "2012-10-15"
+    snippet: >-
+      Personal data may only be collected, used or disclosed with notification of purpose and
+      with consent, which is the statutory basis for notifying a caller that a conversation is
+      being recorded and why.
+  sg_mas_notice_fair_dealing_vulnerable:
+    title: "MAS Guidelines on Standards of Conduct for Advisory Representatives (selected customers)"
+    source_type: guideline
+    published_date: "2023-01-01"
+    snippet: >-
+      Additional care is expected for selected customers, including older customers and those
+      who are not proficient in the language of the advice, so that recommendations remain
+      suitable and are understood.
+  au_asic_rg271:
+    title: "ASIC Regulatory Guide 271, Internal dispute resolution"
+    source_type: guideline
+    published_date: "2020-07-30"
+    snippet: >-
+      Australian Securities and Investments Commission guidance requiring firms to tell
+      complainants how to make a complaint, to acknowledge it, and to explain access to the
+      external dispute resolution scheme.
+  au_gi_code:
+    title: "General Insurance Code of Practice (Insurance Council of Australia), 2020 edition"
+    source_type: guideline
+    published_date: "2021-07-01"
+    snippet: >-
+      Industry code commitments on selling insurance: explain the cover, its significant
+      exclusions and the cooling-off period, and identify and support customers experiencing
+      vulnerability.
+  au_privacy_apps:
+    title: "Privacy Act 1988 (Cth), Australian Privacy Principles 3 and 5"
+    source_type: regulation
+    published_date: "1988-12-21"
+    snippet: >-
+      Personal information must be collected only where reasonably necessary and the individual
+      must be notified of the collection and its purposes at or before the time of collection.
+  jp_fiea_solicitation:
+    title: >-
+      Financial Instruments and Exchange Act (Japan), Articles 37 to 38 (advertising and
+      prohibited solicitation)
+    source_type: regulation
+    published_date: "2007-09-30"
+    snippet: >-
+      Financial instruments business operators must state the risk of principal loss and the
+      fees payable when soliciting, and must not make conclusive statements about uncertain
+      matters.
+  jp_appi_notice:
+    title: "Act on the Protection of Personal Information (Japan), Articles 17 to 21"
+    source_type: regulation
+    published_date: "2022-04-01"
+    snippet: >-
+      The purpose of use of personal information must be specified and notified to or publicly
+      announced for the individual, which is the basis for stating that a call is recorded and
+      for what purpose.
+
+# --------------------------------------------------------------------------- #
+# The packs. One per market and product line. `pack_id` is what a scorecard records.
+# --------------------------------------------------------------------------- #
+packs:
+  sg-retail-banking-v1:
+    market: SG
+    locale: en-SG
+    product: retail_investment_advice
+    description: >-
+      Singapore retail investment advice over the telephone: recording notice, identity check,
+      risk and fee disclosure in the mandated order, and the complaint channel.
+    phrases:
+      recording_notice:
+        label: Recording and purpose notice
+        required_phrase: this call may be recorded
+        paraphrases:
+          - this call is being recorded
+          - we record calls for quality and training
+      identity_check:
+        label: Customer identity verification
+        required_phrase: confirm your date of birth
+        paraphrases:
+          - verify your identity
+          - confirm your registered address
+      purpose_of_call:
+        label: Purpose of the call
+        required_phrase: the purpose of this call
+        paraphrases:
+          - i am calling about
+          - the reason for my call
+      risk_warning:
+        label: Capital-at-risk warning
+        required_phrase: the value of your investment can go down
+        paraphrases:
+          - you may get back less than you invested
+          - your capital is at risk
+      fee_disclosure:
+        label: Fees and charges
+        required_phrase: the fees and charges that apply
+        paraphrases:
+          - a sales charge of up to five per cent applies
+          - there is an annual management fee
+      consent_to_proceed:
+        label: Consent to proceed
+        required_phrase: are you happy to proceed
+        paraphrases:
+          - would you like to go ahead
+          - do i have your agreement to proceed
+      complaint_channel:
+        label: Complaint channel
+        required_phrase: you can raise a complaint
+        paraphrases:
+          - our complaints process
+          - you may refer the matter to our complaints team
+    requirements:
+      - id: SG-DISC-RECORDING
+        kind: disclosure
+        steps: [recording_notice]
+        role: agent
+        severity: high
+        deadline_ms: 60000
+        citation: sg_pdpa_recording
+        description: The caller is told the conversation is recorded, within the first minute.
+        remediation: >-
+          Coach the representative to open with the recording and purpose notice before any
+          personal data is collected, and re-notify the customer in writing.
+      - id: SG-DISC-IDENTITY
+        kind: disclosure
+        steps: [identity_check]
+        role: agent
+        severity: critical
+        deadline_ms: 180000
+        citation: sg_mas_fair_dealing
+        description: The customer's identity is verified before any account-specific discussion.
+        remediation: >-
+          Treat the contact as unverified: do not act on any instruction given on it, and
+          re-verify the customer through an authenticated channel.
+      - id: SG-DISC-RISK
+        kind: disclosure
+        steps: [risk_warning]
+        role: agent
+        severity: critical
+        citation: sg_mas_fair_dealing
+        description: The capital-at-risk warning is given before the customer commits.
+        remediation: >-
+          Contact the customer, give the capital-at-risk warning, and confirm whether they wish
+          to proceed or to cancel within the cooling-off period.
+      - id: SG-DISC-FEES
+        kind: disclosure
+        steps: [fee_disclosure]
+        role: agent
+        severity: high
+        citation: sg_mas_fair_dealing
+        description: All applicable fees and charges are disclosed.
+        remediation: Send the full fee schedule and confirm the customer's continued consent.
+      - id: SG-SCRIPT-ADVICE-ORDER
+        kind: script_segment
+        steps: [purpose_of_call, risk_warning, fee_disclosure, consent_to_proceed]
+        role: agent
+        severity: high
+        within_ms: 900000
+        citation: sg_mas_fair_dealing
+        description: >-
+          The advice script runs in the mandated order: purpose, then risk, then fees, and only
+          then consent. Consent taken before the risk and fee disclosures is not informed.
+        remediation: >-
+          Re-run the disclosure sequence with the customer in order and re-take consent; the
+          existing consent is not informed consent.
+      - id: SG-DISC-COMPLAINT
+        kind: disclosure
+        steps: [complaint_channel]
+        role: agent
+        severity: medium
+        citation: sg_mas_fair_dealing
+        description: The customer is told how to raise a complaint.
+        remediation: Send the complaint-channel details in the follow-up summary.
+    cues:
+      customer_frustration:
+        kind: sentiment
+        label: Customer frustration
+        severity: low
+        polarity: -1
+        phrases:
+          - this is ridiculous
+          - i have called three times
+          - nobody has helped me
+          - i am not happy
+      customer_escalation:
+        kind: sentiment
+        label: Escalation language
+        severity: medium
+        polarity: -1
+        phrases:
+          - i want to speak to your manager
+          - i will make a complaint
+          - i am going to the regulator
+      customer_satisfied:
+        kind: sentiment
+        label: Customer satisfaction
+        severity: low
+        polarity: 1
+        phrases:
+          - that is very helpful
+          - thank you for explaining
+          - that answers my question
+      financial_hardship:
+        kind: vulnerability
+        label: Financial hardship
+        severity: high
+        citation: sg_mas_notice_fair_dealing_vulnerable
+        phrases:
+          - i have lost my job
+          - i cannot afford the repayments
+          - i am behind on my bills
+          - i am struggling financially
+      bereavement:
+        kind: vulnerability
+        label: Recent bereavement
+        severity: high
+        citation: sg_mas_notice_fair_dealing_vulnerable
+        phrases:
+          - my husband passed away
+          - my wife passed away
+          - there has been a death in the family
+      health_condition:
+        kind: vulnerability
+        label: Health condition affecting the customer
+        severity: high
+        citation: sg_mas_notice_fair_dealing_vulnerable
+        phrases:
+          - i am in hospital
+          - i have been unwell
+          - i am on medication that affects my memory
+      comprehension_difficulty:
+        kind: vulnerability
+        label: Comprehension or language difficulty
+        severity: medium
+        citation: sg_mas_notice_fair_dealing_vulnerable
+        phrases:
+          - i do not understand what you mean
+          - can you say that again slowly
+          - my english is not very good
+
+  au-general-insurance-v1:
+    market: AU
+    locale: en-AU
+    product: general_insurance_sales
+    description: >-
+      Australian general-insurance telephone sales: collection notice, cover and exclusions,
+      cooling-off period, and the internal dispute resolution pathway.
+    phrases:
+      collection_notice:
+        label: Privacy collection notice
+        required_phrase: we collect your personal information
+        paraphrases:
+          - this call is recorded and your details are collected
+          - our privacy collection statement
+      cover_explanation:
+        label: What the policy covers
+        required_phrase: what this policy covers
+        paraphrases:
+          - the cover you would have
+          - what you are insured for
+      exclusions_notice:
+        label: Significant exclusions
+        required_phrase: significant exclusions
+        paraphrases:
+          - what is not covered
+          - this policy does not cover
+      cooling_off_notice:
+        label: Cooling-off period
+        required_phrase: a cooling off period of fourteen days
+        paraphrases:
+          - you can cancel within fourteen days
+          - a fourteen day cooling off period
+      dispute_pathway:
+        label: Internal and external dispute resolution
+        required_phrase: our internal dispute resolution
+        paraphrases:
+          - you can complain to us
+          - the australian financial complaints authority
+      consent_to_proceed:
+        label: Consent to proceed
+        required_phrase: are you happy to proceed
+        paraphrases:
+          - shall i set that up for you
+          - would you like to go ahead
+    requirements:
+      - id: AU-DISC-COLLECTION
+        kind: disclosure
+        steps: [collection_notice]
+        role: agent
+        severity: high
+        deadline_ms: 90000
+        citation: au_privacy_apps
+        description: The privacy collection notice is given early in the contact.
+        remediation: Send the collection statement in writing and record the notification date.
+      - id: AU-DISC-EXCLUSIONS
+        kind: disclosure
+        steps: [exclusions_notice]
+        role: agent
+        severity: critical
+        citation: au_gi_code
+        description: Significant exclusions are explained before the sale is completed.
+        remediation: >-
+          Contact the customer, explain the significant exclusions, and offer cancellation with
+          a full refund outside the cooling-off period if they were not disclosed.
+      - id: AU-DISC-COOLING-OFF
+        kind: disclosure
+        steps: [cooling_off_notice]
+        role: agent
+        severity: high
+        citation: au_gi_code
+        description: The cooling-off period is stated.
+        remediation: Restate the cooling-off period in writing and restart it from that date.
+      - id: AU-DISC-DISPUTE
+        kind: disclosure
+        steps: [dispute_pathway]
+        role: agent
+        severity: medium
+        citation: au_asic_rg271
+        description: The customer is told how to complain and about external dispute resolution.
+        remediation: Include the dispute-resolution pathway in the confirmation pack.
+      - id: AU-SCRIPT-SALE-ORDER
+        kind: script_segment
+        steps: [cover_explanation, exclusions_notice, cooling_off_notice, consent_to_proceed]
+        role: agent
+        severity: high
+        within_ms: 900000
+        citation: au_gi_code
+        description: >-
+          Cover, then exclusions, then cooling off, and only then consent. Consent taken before
+          the exclusions are explained is not an informed purchase.
+        remediation: Re-run the sale script in order and re-take consent.
+    cues:
+      customer_frustration:
+        kind: sentiment
+        label: Customer frustration
+        severity: low
+        polarity: -1
+        phrases:
+          - this is ridiculous
+          - i have called three times
+          - nobody has helped me
+      customer_escalation:
+        kind: sentiment
+        label: Escalation language
+        severity: medium
+        polarity: -1
+        phrases:
+          - i want to speak to your manager
+          - i will take this to the ombudsman
+      customer_satisfied:
+        kind: sentiment
+        label: Customer satisfaction
+        severity: low
+        polarity: 1
+        phrases:
+          - that is very helpful
+          - thank you for explaining
+      financial_hardship:
+        kind: vulnerability
+        label: Financial hardship
+        severity: high
+        citation: au_gi_code
+        phrases:
+          - i have lost my job
+          - i cannot afford the premium
+          - i am on a pension and cannot pay
+      natural_disaster_impact:
+        kind: vulnerability
+        label: Recent natural disaster impact
+        severity: high
+        citation: au_gi_code
+        phrases:
+          - our house was flooded
+          - we lost the house in the bushfire
+          - the storm destroyed the roof
+      comprehension_difficulty:
+        kind: vulnerability
+        label: Comprehension or language difficulty
+        severity: medium
+        citation: au_gi_code
+        phrases:
+          - i do not understand what you mean
+          - can you say that again slowly
+
+  jp-retail-banking-v1:
+    market: JP
+    locale: ja-JP
+    product: retail_investment_advice
+    description: >-
+      Japanese retail investment solicitation by telephone. Japanese has no word separators, so
+      the shared kernel matches over the character run after folding kana, full-width forms and
+      prolonged sound marks; the wordings below are matched, never translated.
+    phrases:
+      recording_notice:
+        label: Recording and purpose notice
+        required_phrase: この通話は録音されています
+        paraphrases:
+          - 通話を録音させていただきます
+      risk_warning:
+        label: Capital-at-risk warning
+        required_phrase: 元本割れのリスクがあります
+        paraphrases:
+          - 元本は保証されていません
+      fee_disclosure:
+        label: Fees and charges
+        required_phrase: 手数料がかかります
+        paraphrases:
+          - 販売手数料と信託報酬がかかります
+      consent_to_proceed:
+        label: Consent to proceed
+        required_phrase: お手続きを進めてよろしいでしょうか
+        paraphrases:
+          - ご了承いただけますでしょうか
+    requirements:
+      - id: JP-DISC-RECORDING
+        kind: disclosure
+        steps: [recording_notice]
+        role: agent
+        severity: high
+        deadline_ms: 60000
+        citation: jp_appi_notice
+        description: The caller is told the conversation is recorded, within the first minute.
+        remediation: Re-notify the customer of the recording and its purpose in writing.
+      - id: JP-DISC-RISK
+        kind: disclosure
+        steps: [risk_warning]
+        role: agent
+        severity: critical
+        citation: jp_fiea_solicitation
+        description: The risk of principal loss is stated during solicitation.
+        remediation: >-
+          Contact the customer, state the risk of principal loss, and confirm whether they wish
+          to proceed.
+      - id: JP-SCRIPT-SOLICITATION-ORDER
+        kind: script_segment
+        steps: [risk_warning, fee_disclosure, consent_to_proceed]
+        role: agent
+        severity: high
+        within_ms: 900000
+        citation: jp_fiea_solicitation
+        description: Risk, then fees, and only then consent.
+        remediation: Re-run the solicitation script in order and re-take consent.
+    cues:
+      customer_frustration:
+        kind: sentiment
+        label: Customer frustration
+        severity: low
+        polarity: -1
+        phrases:
+          - 何度も電話しています
+          - 納得できません
+      customer_satisfied:
+        kind: sentiment
+        label: Customer satisfaction
+        severity: low
+        polarity: 1
+        phrases:
+          - よく分かりました
+          - ありがとうございます
+      financial_hardship:
+        kind: vulnerability
+        label: Financial hardship
+        severity: high
+        citation: jp_fiea_solicitation
+        phrases:
+          - 仕事を失いました
+          - 支払いが難しいです
+      comprehension_difficulty:
+        kind: vulnerability
+        label: Comprehension difficulty
+        severity: medium
+        citation: jp_fiea_solicitation
+        phrases:
+          - よく分かりません
+          - もう一度ゆっくり説明してください
