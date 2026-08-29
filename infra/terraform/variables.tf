@@ -240,7 +240,7 @@ variable "create_firestore_database" {
 variable "human_review_url" {
   description = <<-EOT
     The Hrz7 human-review console the managed review router submits escalations to
-    (HRZ_HUMAN_REVIEW_URL). Rule R8 says an escalation is ROUTED and never merely flagged, and
+    (HUMAN_REVIEW_URL). Rule R8 says an escalation is ROUTED and never merely flagged, and
     the managed router refuses rather than swallowing one when this is empty, so the serving
     edge requires it: a deploy that would ship R8 unwired fails here instead of at the first
     escalation. HTTPS is required, because the payload carries a redacted scorecard.
@@ -305,7 +305,7 @@ variable "additional_secret_env" {
   description = <<-EOT
     Environment variable name to an immutable existing Secret Manager secret version, mounted
     on the API service. This is how the inbound service credential (CONVQA_S2S_TOKEN) and the
-    outbound Hrz7 credentials (HRZ7_S2S_TOKEN, HRZ7_S2S_SIGNING_KEY) reach the process: no
+    outbound Hrz7 credentials (HUMAN_REVIEW_S2S_TOKEN, HUMAN_REVIEW_S2S_SIGNING_KEY) reach the process: no
     secret value is ever written into this configuration. Names this stack sets itself are
     reserved, so a secret cannot silently shadow the residency, identity or routing wiring.
   EOT
@@ -329,7 +329,7 @@ variable "additional_secret_env" {
         "CONVQA_QUALITY_URL",
         "GOOGLE_CLOUD_PROJECT",
         "GCP_REGION",
-        "HRZ_HUMAN_REVIEW_URL",
+        "HUMAN_REVIEW_URL",
         "OTEL_EXPORTER_OTLP_ENDPOINT",
         "PORT",
       ], name)
