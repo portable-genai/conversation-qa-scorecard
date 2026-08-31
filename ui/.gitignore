@@ -4,8 +4,3 @@ next-env.d.ts.bak
 *.tsbuildinfo
 .env
 .env.local
-
-# Written by `next build` / `next dev` into this directory, not authored here.
-# The repo's own agent guidance lives in the ROOT AGENTS.md, and a second, generated copy
-# inside ui/ would quietly compete with it.
-AGENTS.md
