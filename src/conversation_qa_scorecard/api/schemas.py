@@ -197,6 +197,10 @@ class HealthResponse(BaseModel):
     status: str
     profile: str
     region: str
+    #: Provenance the UI banner states on every page: where the runtime sits and which model
+    #: answers. Both are read off the service because the browser cannot know either.
+    runtime: str = "local"  # "gcp" | "local"
+    generator_model: str = "deterministic-offline-stub"
 
 
 def _citation(citation: object) -> CitationModel:
