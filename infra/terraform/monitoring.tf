@@ -18,7 +18,7 @@
 #   - cmek_changes : a CMEK key destroy or update. Key material changing is a P-09 event.
 #   - edge_denials : Cloud Armor denied or throttled a request at the edge.
 #
-# There is deliberately no guardrail-block metric. Doc1 alerts on one because it binds a
+# There is deliberately no guardrail-block metric. cdd-sow-research alerts on one because it binds a
 # guardrail port; this service has none yet (COMPLIANCE rule R1 records that as owed), and a
 # metric whose filter can never match is a green light nobody earned. Add it in the same
 # commit that binds the guardrail.

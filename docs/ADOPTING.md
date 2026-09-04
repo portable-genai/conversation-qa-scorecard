@@ -75,7 +75,7 @@ make gate
 There is deliberately no `--cli` flag: `[project.scripts]` names the console script after the
 package, so `--package` renames both and a second flag could only drift out of step. There is no
 `--dist` flag either: the distribution name, the GitHub id in `[project.urls]`, the A2A
-agent-card name and the Hrz4 eval bundle id are the same one literal, and `--resource` renames
+agent-card name and the `model-quality-gate` eval bundle id are the same one literal, and `--resource` renames
 it. Add `--include-docs` to sweep Markdown prose too. The script deliberately does NOT touch the
 human decisions below.
 
@@ -133,17 +133,17 @@ are owned by sibling services; integrate rather than rebuild them. See
 - **E1** contact-centre copilot (`contact-centre-conversations`): the live half of the same market
   obligations. It reminds an agent from the disclosure pack; this service grades against it.
   Neither owns the other's surface.
-- **Hrz7** human-review console: every non-compliant scorecard is routed there in the same call
+- `human-review-console`: every non-compliant scorecard is routed there in the same call
   that produced it, over the shared `review-kit` (rule R8). You wire your endpoint; you do
   not re-implement the console.
-- **Hrz4** AI-quality and model-risk gate: owns promotion. `eval/run_eval.py --mode gate`
+- `model-quality-gate`: owns promotion. `eval/run_eval.py --mode gate`
   delegates the verdict to it and refuses to run off the managed profile.
-- **Hrz5** observability and immutable WORM audit: trace spans and audit events go there.
-- **Hrz3** agent registry: this agent publishes its A2A card at
+- `agent-observability` and immutable WORM audit: trace spans and audit events go there.
+- `agent-registry`: this agent publishes its A2A card at
   `/.well-known/agent-card.json` for discovery.
-- **Hrz1** guardrail gateway: the injection-defence hop for the narration brief. Not bound in
+- `agent-guardrail-gateway`: the injection-defence hop for the narration brief. Not bound in
   this repo today; see [`model-card.md`](model-card.md).
-- **Hrz2** enterprise knowledge base: **not** integrated, and should not be. This service
+- `enterprise-knowledge-base`: **not** integrated, and should not be. This service
   retrieves nothing. Its findings come from a configured pack matched against a transcript, so
   there is no retrieval path to ground.
 
@@ -162,5 +162,5 @@ are owned by sibling services; integrate rather than rebuild them. See
 - [ ] Replaced every synthetic transcript and fixture.
 - [ ] Rebuilt the eval golden set and thresholds for your pack.
 - [ ] Reviewed the deploy posture (Dockerfile, Terraform, bind address) before exposing anything.
-- [ ] Wired your Hrz7 endpoint and decided which sibling services you integrate vs stub.
+- [ ] Wired your `human-review-console` endpoint and decided which sibling services you integrate vs stub.
 - [ ] Recorded your baseline upstream tag so you can take future fixes.

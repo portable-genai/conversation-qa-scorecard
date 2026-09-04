@@ -4,10 +4,10 @@ Lives in the adapter layer, not the pure domain, because it depends on the kit. 
 that crosses the wire is redacted AGAIN here, using the shared ``pii-kit``, even though the
 transcript was already masked at ingestion: the console is a SHARED sink, a contact filed in
 one market may still quote another market's national id, and defence in depth at a service
-boundary costs one regex pass. Hrz7 redacts once more before its own audit write.
+boundary costs one regex pass. human-review-console redacts once more before its own audit write.
 
-``maker`` and ``tenant`` are asserted here and trusted by Hrz7 because the caller is an
-authenticated S2S service; per-hop on-behalf-of token exchange is the deferred next layer.
+``maker`` and ``tenant`` are asserted here and trusted by human-review-console because the caller is
+an authenticated S2S service; per-hop on-behalf-of token exchange is the deferred next layer.
 """
 
 from __future__ import annotations
@@ -76,7 +76,9 @@ def _kit_citations(scorecard: Scorecard) -> tuple[KitCitation, ...]:
 
 
 def scorecard_to_review(scorecard: Scorecard, *, maker: str, tenant: str = "") -> Review:
-    """Build the review a producer submits to Hrz7 when a scorecard does not pass."""
+    """Build the review a producer submits to human-review-console when a
+    scorecard does not pass.
+    """
     return Review(
         action=_ACTION,
         subject=_redact(scorecard.contact_id),
@@ -90,6 +92,6 @@ def scorecard_to_review(scorecard: Scorecard, *, maker: str, tenant: str = "") -
         # Producer-owned, tenant-scoped key so a retried delivery is idempotent at the console.
         # The scorecard id is already a digest of the contact, pack, transcript and outcome, so
         # a re-score that changed nothing does not open a second review.
-        source_key=f"E3:{scorecard.scorecard_id}",
+        source_key=f"conversation-qa-scorecard:{scorecard.scorecard_id}",
         citations=_kit_citations(scorecard),
     )

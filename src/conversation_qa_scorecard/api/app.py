@@ -301,7 +301,7 @@ def score_contact(
 ) -> ScorecardResponse:
     """Score one contact. The tenant is the verified principal's, never the request body.
 
-    Rule R8: a scorecard that sets ``requires_human_review`` is ROUTED to the Hrz7 console
+    Rule R8: a scorecard that sets ``requires_human_review`` is ROUTED to the human-review-console
     inside the same call that produced it (in the domain service, so every surface inherits
     it). Setting the flag is not the escalation; routing is, and ``review_ref`` records where
     it went. The maker is the verified principal, so the console knows who originated it.

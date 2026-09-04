@@ -71,6 +71,6 @@ resource "google_bigquery_table" "scorecards" {
     { name = "failing_requirement_ids", type = "STRING", mode = "REPEATED", description = "Requirement ids, never their wording." },
     { name = "vulnerability_cue_ids", type = "STRING", mode = "REPEATED", description = "Cue ids, never the utterance that matched." },
     { name = "requires_human_review", type = "BOOLEAN", mode = "REQUIRED", description = "Maker-checker flag (P-06)." },
-    { name = "review_ref", type = "STRING", mode = "NULLABLE", description = "Reference returned by the Hrz7 console when the escalation was routed (R8)." },
+    { name = "review_ref", type = "STRING", mode = "NULLABLE", description = "Reference returned by the human-review-console when the escalation was routed (R8)." },
   ])
 }

@@ -6,11 +6,11 @@
 #         scorecard, export the flat row, write audit and traces, call the narration model,
 #         read its own secrets). No shared kitchen-sink account and no primitive roles.
 #   P-03 (residency): the identity is project-scoped and every service it reaches is regional.
-#   P-06 / R8: routing an escalation to the Hrz7 console is an outbound HTTPS call carrying a
+#   P-06 / R8: routing an escalation to the human-review-console is an outbound HTTPS call carrying a
 #         service credential from Secret Manager, not a GCP IAM role, so nothing is granted
 #         for it here.
 #
-# There is deliberately ONE service account. Doc1 carries a second identity for its Agent
+# There is deliberately ONE service account. cdd-sow-research carries a second identity for its Agent
 # Runtime; this repo's agent surface is a set of plain tool callables that run inside the same
 # process as the API (nothing in agent/ needs a runtime to import), so a second identity would
 # have nothing to attach to and would only widen what is provisioned. Add one in the same
