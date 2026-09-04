@@ -3,7 +3,7 @@
 # Matches the reference stack, adapted for this repo. Every run below uses `mock_provider`, so the
 # whole file runs with NO credentials, NO project and NO network beyond the provider download:
 #   terraform init -backend=false && terraform test
-# The Doc1 runs that were NOT portable are the Mode 5 signing-key stages and the installation
+# The cdd-sow-research runs that were NOT portable are the Mode 5 signing-key stages and the installation
 # manifest contract; those are its embedded-grant browser flow, which this service does not
 # have, and their module does not exist here.
 #

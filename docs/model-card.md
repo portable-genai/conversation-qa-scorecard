@@ -54,7 +54,7 @@ Three model-shaped things are in this service's path, and none of them decides a
   deliberately: a stand-in with no evidence for a confidence figure that invented one would put a
   number nobody computed onto a compliance artifact.
 - **Escalation is routed, not flagged.** A scorecard that is not compliant sets
-  `requires_human_review` and is submitted to the Hrz7 console in the same call that produced it
+  `requires_human_review` and is submitted to the `human-review-console` in the same call that produced it
   (rule R8), on the API, the CLI and the agent surface alike. Reads are authorised against the
   verified principal's tenant and answer 403, never 404.
 - **The eval can go red.** `narration_groundedness` runs at a threshold of 1.000 in every
@@ -79,10 +79,10 @@ Three model-shaped things are in this service's path, and none of them decides a
   limit and no switch that forces deterministic-only narration. The switch is cheap here, because
   the deterministic narration path already exists and is exercised in every offline run.
 - **Evaluation of the live model.** The offline eval scores the validator and the local narrator.
-  Add a managed-profile run through the Hrz4 promotion gate that scores real Gemini drafts for
+  Add a managed-profile run through the `model-quality-gate` promotion gate that scores real Gemini drafts for
   groundedness and readability against the same golden scorecards.
 - **Prompt-injection screening.** Customer and agent utterances reach the brief as evidence text.
-  Screen the brief through the Hrz1 guardrail gateway before generation, failing closed to the
+  Screen the brief through the `agent-guardrail-gateway` before generation, failing closed to the
   deterministic narration when the screen is unavailable. That port is not bound in this repo.
 - **Recogniser accuracy as a measured property.** Word error rate, per locale and per channel,
   is not measured here. A disclosure the recogniser mis-transcribes scores as `absent`, which is

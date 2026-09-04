@@ -64,7 +64,7 @@ Locked decisions, pinned stack, contracts. This document is the deepest authorit
   the `as_of` and the outcome, so a re-score that changed nothing updates in place instead of
   opening a second review at the console.
 - **Maker-checker (P-06) and routing (R8)**: any scorecard whose disposition is not `compliant`
-  sets `requires_human_review=True` AND is routed through `ReviewRouterPort` to the Hrz7 console
+  sets `requires_human_review=True` AND is routed through `ReviewRouterPort` to the `human-review-console`
   inside the same call, in the DOMAIN service, so every surface inherits it. The flag alone is
   not the escalation. The response carries `review_ref`, so a caller can tell a routed
   escalation from one that stopped here. The managed adapter refuses to run with no console
@@ -115,7 +115,7 @@ Locked decisions, pinned stack, contracts. This document is the deepest authorit
   resolved server-side and the resolved headers are attached afterwards. The service credential
   is read from the server environment only. Framing and CORS are allowlists that refuse a
   wildcard however it is written, and an empty allowlist denies rather than opening up.
-- **Eval**: `--mode smoke` is the offline pre-merge check; `--mode gate` is the Hrz4 promotion
+- **Eval**: `--mode smoke` is the offline pre-merge check; `--mode gate` is the `model-quality-gate` promotion
   authority. The gate fails closed.
 - **Tests**: split into `unit`, `contract` and `integration`. The offline gate runs the first
   two; every integration module is marked, and that marking is itself enforced.

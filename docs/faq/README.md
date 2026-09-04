@@ -13,9 +13,9 @@ audience; skim the one that matches your role.
 | [compliance-faq.md](compliance-faq.md) | compliance, conduct, privacy, model risk | regulatory posture, evidence, maker-checker, residency, model-risk evidence |
 
 These pages deliberately do NOT re-document capabilities owned by sibling systems in the
-catalog. Where a concern belongs to another system (the guardrail gateway Hrz1, the human-review
-console Hrz7, the AI-quality gate Hrz4, the observability and WORM audit sink Hrz5, the agent
-registry Hrz3, the contact-centre copilot E1), the FAQ points at it and explains the boundary
+catalog. Where a concern belongs to another system (the guardrail gateway `agent-guardrail-gateway`, the human-review
+console `human-review-console`, the AI-quality gate `model-quality-gate`, the observability and WORM audit sink `agent-observability`, the agent
+registry `agent-registry`, the contact-centre copilot E1), the FAQ points at it and explains the boundary
 rather than duplicating it. See [features-faq.md](features-faq.md) for the full map.
 
 Authority order for anything these pages disagree with: `SPEC.md`, then `ARCHITECTURE.md`, then

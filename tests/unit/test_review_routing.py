@@ -1,4 +1,4 @@
-"""Rule R8: a failing scorecard is ROUTED to Hrz7, not left in a per-repo boolean.
+"""Rule R8: a failing scorecard is ROUTED to human-review-console, not left in a per-repo boolean.
 
 This is the standing gate for the failure the rule exists to prevent. A repo can set
 ``requires_human_review = True``, pass every other test, and still auto-execute in practice
@@ -107,7 +107,7 @@ def test_the_routing_key_is_stable_so_a_retry_does_not_open_a_second_review() ->
 
 
 def test_the_payload_is_redacted_before_it_leaves_the_process() -> None:
-    """Hrz7 is a shared sink; a raw identifier must never reach the wire."""
+    """human-review-console is a shared sink; a raw identifier must never reach the wire."""
     router = LocalReviewRouter(_settings())
     router.route(_scorecard(sample_cases.PII_CONTACT), maker=sample_cases.ACTOR)
     wire = repr(router.outbox.pending()[0].review.to_payload())

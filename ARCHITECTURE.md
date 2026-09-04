@@ -80,7 +80,7 @@ behavioural suites cannot quietly assert different things.
       -> score                                     (the engine: every number, every verdict)
       -> advisory colour + narration               (optional, validated, never consequential)
       -> already-redacted WORM audit write         (R2)
-      -> persist, and ROUTE a failing scorecard to Hrz7   (R8)
+      -> persist, and ROUTE a failing scorecard to `human-review-console`   (R8)
       -> export one flat row to the warehouse      (no utterance leaves)
 
 The order is the design. Everything after the mask sees masked text, which is why a citation can
@@ -95,7 +95,7 @@ every surface inherits it rather than each remembering.
 | `AuditSinkPort` | hash-chained SQLite WORM (commons) | Cloud Logging WORM (lazy) | placeholder |
 | `IdentityPort` | seeded personas (commons) | IAP assertion (lazy) | placeholder |
 | `NarrationPort` | deterministic offline drafter | Gemini, schema-validated downstream (lazy) | placeholder |
-| `ReviewRouterPort` | review-kit outbox (offline, inspectable) | Hrz7 service intake over S2S | placeholder |
+| `ReviewRouterPort` | review-kit outbox (offline, inspectable) | `human-review-console` service intake over S2S | placeholder |
 | `ScorecardStorePort` | tenant-scoped SQLite, JSON documents | Firestore in the residency region (lazy) | placeholder |
 | `SignalClassifierPort` | offline advisory note (colour only) | Gemini advisory note (lazy) | placeholder |
 | `TranscriptSourcePort` | synthetic fixture reader | managed batch speech-to-text (lazy) | placeholder |

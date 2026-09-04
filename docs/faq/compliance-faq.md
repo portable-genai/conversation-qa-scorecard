@@ -29,7 +29,7 @@ again on the way out, because a tool result becomes a model's context.
 ## What happens to a contact that fails?
 
 It is HELD and ROUTED, not flagged. A scorecard that is not compliant sets
-`requires_human_review` and is submitted to the Hrz7 review console in the same call that
+`requires_human_review` and is submitted to the `human-review-console` in the same call that
 produced it (rule R8), on the API, the CLI and the agent surface alike. The managed router
 REFUSES when no console is configured rather than swallowing the escalation, so a deployment
 cannot ship with R8 unwired and look green. `tests/unit/test_review_routing.py` asserts the
@@ -80,16 +80,16 @@ Two separate populations, and it is worth being explicit about both.
 
 `COMPLIANCE.md` marks these honestly rather than claiming them.
 
-- **R1, injection defence and output filtering.** Redaction ships; the Hrz1 guardrail binding
+- **R1, injection defence and output filtering.** Redaction ships; the `agent-guardrail-gateway` binding
   does not. Customer and agent utterances reach the narration brief as evidence text.
 - **R2, the shared observability sink.** The immutable audit half is local and tamper-evident;
-  binding an observability client to Hrz5 is open.
+  binding an observability client to `agent-observability` is open.
 - **R4 and R5, the registry and the promotion gate.** The A2A card and the `--mode gate` client
-  half both exist; registering with Hrz3 and Hrz4 is a deployment act.
+  half both exist; registering with `agent-registry` and `model-quality-gate` is a deployment act.
 - **P-09, network perimeter.** CMEK, least-privilege IAM, no service-account keys and a
   dry-run-first VPC-SC perimeter all ship in `infra/terraform/`. Private endpoints and a distinct
   agent identity are recorded as open.
-- **R6, intake validation.** Record the Rsk3 reference when the project passes it.
+- **R6, intake validation.** Record the `architecture-validator` reference when the project passes it.
 
 ## Who owns the regulator crosswalk?
 
@@ -105,6 +105,6 @@ The offline eval runs eight metrics in every gate, and each is proved able to fa
 metric still passes. `narration_groundedness` runs at a threshold of 1.000.
 
 What does not exist yet is a managed-profile evaluation: the offline eval scores the deterministic
-pipeline and the local narrator, not live Gemini output. Registering the bundle with Hrz4 and
+pipeline and the local narrator, not live Gemini output. Registering the bundle with `model-quality-gate` and
 running a managed evaluation is the open item in [`../model-card.md`](../model-card.md), and
 until it is done the managed model path is not production-cleared.

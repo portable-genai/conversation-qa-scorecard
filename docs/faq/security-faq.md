@@ -46,7 +46,7 @@ tenant field in the request. `tests/unit/test_scorecard_store_and_tenancy.py` is
 Redacted text only, and only after every decision has been made. `domain/ingestion.py`
 (`redaction_spans`, `redact_for_scoring`) masks personal data with the `pii-kit` jurisdiction
 rows before the scoring engine, before the narrator and before the audit write, so no raw
-identifier reaches a WORM record, the Hrz7 console or a model. Agent tool results are masked
+identifier reaches a WORM record, the `human-review-console` or a model. Agent tool results are masked
 again on the way out, because a tool result becomes a model's context and the API response does
 not. See [`../model-card.md`](../model-card.md) for the full boundary.
 
@@ -93,11 +93,11 @@ consistent step.
 
 ## What is explicitly NOT in scope here?
 
-- **Injection defence and output filtering.** That is the Hrz1 guardrail gateway's job. This repo
+- **Injection defence and output filtering.** That is the `agent-guardrail-gateway`'s job. This repo
   redacts but does not screen, and `COMPLIANCE.md` R1 records it as an open binding rather than
   claiming it.
-- **The review console.** Escalations are routed to Hrz7; the console itself is that system.
-- **Trace collection.** Spans go to Hrz5; this repo has no observability backend of its own.
+- **The review console.** Escalations are routed to `human-review-console`; the console itself is that system.
+- **Trace collection.** Spans go to `agent-observability`; this repo has no observability backend of its own.
 - **Network perimeter.** `infra/terraform/vpc_sc.tf` stands up a dry-run-first VPC-SC perimeter,
   but private endpoints and the egress rule that reaches the review console and nothing else are
   recorded as open in `COMPLIANCE.md` P-09.

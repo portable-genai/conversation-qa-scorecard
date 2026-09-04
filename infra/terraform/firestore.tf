@@ -3,7 +3,7 @@
 # Matches the reference set because this service genuinely needs the same storage shape,
 # not because the file was there: the managed ScorecardStorePort adapter
 # (adapters/gcp/scorecard_store.py) is a Firestore adapter, and a scorecard is the evidence a
-# reviewer is shown behind the tenant boundary's 403. What is NOT ported is Doc1's browser-flow
+# reviewer is shown behind the tenant boundary's 403. What is NOT ported is cdd-sow-research's browser-flow
 # TTL fields, its alias, outbox, replay and rate-limit collections and their composite index:
 # those belong to its embedded-grant browser flow, which this service does not have.
 #

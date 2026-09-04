@@ -25,7 +25,7 @@ It rewrites the package name, the `CONVQA` environment prefix, the distribution 
 and the Terraform `name_prefix` default, then renames `src/conversation_qa_scorecard/`. It writes
 nothing without `--yes`. There is no `--cli` flag because `[project.scripts]` names the console
 script after the package, and no `--dist` flag because the distribution name, the GitHub id, the
-A2A agent-card name and the Hrz4 eval bundle id are the same one literal that `--resource`
+A2A agent-card name and the `model-quality-gate` eval bundle id are the same one literal that `--resource`
 renames.
 
 Recreate the venv afterwards: the distribution name changed, so an existing editable install
@@ -95,12 +95,12 @@ taken.
 3. **Durable storage**: `scorecard_path` for the scorecard store, `warehouse_table` for the
    analytics export. The defaults are ephemeral on purpose.
 4. **An IdP**, configured on the deployed service, plus `CONVQA_IAP_AUDIENCE`.
-5. **An Hrz7 endpoint**, or nothing that is non-compliant reaches a human.
+5. **An `human-review-console` endpoint**, or nothing that is non-compliant reaches a human.
 
 ## What is still open?
 
 [`../practices-audit.md`](../practices-audit.md) carries the honest per-check verdict and names
 the work list. The items that need your network and your project rather than a code change are
-the Hrz1 guardrail binding, the Hrz5 observability binding, registering the metric bundle with
-Hrz4, and the private-egress rule. The Terraform in this repo is validated and tested offline
+the `agent-guardrail-gateway` binding, the `agent-observability` binding, registering the metric bundle with
+`model-quality-gate`, and the private-egress rule. The Terraform in this repo is validated and tested offline
 and has never been applied.

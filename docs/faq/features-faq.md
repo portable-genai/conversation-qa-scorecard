@@ -87,13 +87,13 @@ refuses rather than picking a winner.
 | Concern | Owner | How it appears here |
 |---|---|---|
 | Live agent assist and disclosure reminders | **E1** contact-centre copilot | the sibling disclosure pack, above. This repo has no live surface |
-| Human review and maker-checker | **Hrz7** review console | `ports/review_router.py`, bound in all three families over the shared `review-kit`. Rule R8 |
-| Model and agent promotion | **Hrz4** AI-quality gate | `eval/run_eval.py --mode gate` is the client half and refuses off the managed profile |
-| Tracing and immutable WORM audit | **Hrz5** observability | `ports/observability.py`; the local audit half is tamper-evident today, the shared sink is an open binding |
-| Agent discovery and entitlements | **Hrz3** agent registry | the A2A card at `/.well-known/agent-card.json`, built from the same tool table the runtime binds |
-| Injection defence and output filtering | **Hrz1** guardrail gateway | NOT bound today. `COMPLIANCE.md` R1 records it as owed rather than claiming it |
-| Grounded retrieval | **Hrz2** knowledge base | not applicable. This service retrieves nothing: findings come from a configured pack matched against a transcript |
-| Consent and marketing screening | **Mkt6** | not applicable. This service produces no customer-facing output at all |
+| Human review and maker-checker | `human-review-console` | `ports/review_router.py`, bound in all three families over the shared `review-kit`. Rule R8 |
+| Model and agent promotion | `model-quality-gate` | `eval/run_eval.py --mode gate` is the client half and refuses off the managed profile |
+| Tracing and immutable WORM audit | `agent-observability` | `ports/observability.py`; the local audit half is tamper-evident today, the shared sink is an open binding |
+| Agent discovery and entitlements | `agent-registry` | the A2A card at `/.well-known/agent-card.json`, built from the same tool table the runtime binds |
+| Injection defence and output filtering | `agent-guardrail-gateway` | NOT bound today. `COMPLIANCE.md` R1 records it as owed rather than claiming it |
+| Grounded retrieval | `enterprise-knowledge-base` knowledge base | not applicable. This service retrieves nothing: findings come from a configured pack matched against a transcript |
+| Consent and marketing screening | `marketing-compliance-gate` | not applicable. This service produces no customer-facing output at all |
 
 ## How many surfaces are there, and do they agree?
 
