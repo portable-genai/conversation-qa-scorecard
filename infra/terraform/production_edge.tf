@@ -69,7 +69,7 @@ resource "google_cloud_run_v2_service" "api" {
     service_account = google_service_account.app.email
 
     # CMEK on the revision's own storage (P-09): it does not cascade from anywhere else.
-    encryption_key = google_kms_crypto_key.scorecard.id
+    encryption_key = one(google_kms_crypto_key.scorecard[*].id)
 
     scaling {
       min_instance_count = var.edge_min_instances

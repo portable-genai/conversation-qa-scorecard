@@ -24,8 +24,11 @@ resource "google_bigquery_dataset" "scorecards" {
   location                   = var.region # in-country analytics (P-03)
   delete_contents_on_destroy = false
 
-  default_encryption_configuration {
-    kms_key_name = google_kms_crypto_key.scorecard.id # CMEK (P-09)
+  dynamic "default_encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.scorecard[*].id) # CMEK (P-09)
+    }
   }
 
   depends_on = [
@@ -51,8 +54,11 @@ resource "google_bigquery_table" "scorecards" {
 
   clustering = ["tenant", "market"]
 
-  encryption_configuration {
-    kms_key_name = google_kms_crypto_key.scorecard.id
+  dynamic "encryption_configuration" {
+    for_each = var.cmek_enabled ? [1] : []
+    content {
+      kms_key_name = one(google_kms_crypto_key.scorecard[*].id)
+    }
   }
 
   schema = jsonencode([
