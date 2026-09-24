@@ -2,13 +2,16 @@
 
 The wire shape is deliberately close to the domain shape: a scorecard is a compliance record,
 and a reviewer, an auditor and a UI should all be able to read the same document. The one
-thing the wire adds is ``review_ref``, which says where an escalation WENT.
+things the wire adds are ``review_ref``, which says where an escalation WENT, and
+``review_routing``, which says what happened to the hand-off.
 
 The request carries no tenant and no actor. Both come from the verified principal, server side;
 a client-asserted actor is discarded before it reaches the domain (see ``api/app.py``).
 """
 
 from __future__ import annotations
+
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -100,10 +103,14 @@ class ScorecardResponse(BaseModel):
     redaction_count: int = 0
     engine_version: str = ""
     #: Where the escalation WENT (rule R8): the human-review-console review id, or the local queue
-    #: reference.
-    #: Empty only when the scorecard passed. A caller can tell a routed escalation from a flag
-    #: that stopped here, which is the whole point of the rule.
+    #: reference. Empty when the scorecard passed, and when ``review_routing`` is ``failed`` or
+    #: ``off``. A caller can tell a routed escalation from a flag that stopped here, which is
+    #: the whole point of the rule.
     review_ref: str = ""
+    #: What happened to the hand-off on the call that scored this contact: routed, failed, off
+    #: or not_required. ``failed`` means the scorecard is NOT queued for review, and the console
+    #: says so. Absent (null) on a stored scorecard read back, because a read routes nothing.
+    review_routing: Literal["routed", "failed", "off", "not_required"] | None = None
     findings: list[FindingModel] = []
     signals: list[SignalModel] = []
     citations: list[CitationModel] = []
@@ -111,7 +118,9 @@ class ScorecardResponse(BaseModel):
     narration: NarrationModel | None = None
 
     @classmethod
-    def from_domain(cls, scorecard: Scorecard) -> ScorecardResponse:
+    def from_domain(
+        cls, scorecard: Scorecard, *, review_routing: str | None = None
+    ) -> ScorecardResponse:
         return cls(
             scorecard_id=scorecard.scorecard_id,
             contact_id=scorecard.contact_id,
@@ -132,6 +141,7 @@ class ScorecardResponse(BaseModel):
             redaction_count=scorecard.redaction_count,
             engine_version=scorecard.engine_version,
             review_ref=scorecard.review_ref,
+            review_routing=review_routing,  # type: ignore[arg-type]
             findings=[
                 FindingModel(
                     requirement_id=finding.requirement_id,

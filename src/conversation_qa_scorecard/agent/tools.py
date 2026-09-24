@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any
 from hex_service_kit.serialization import to_jsonable
 from pii_kit import redact
 
+from ..adapters.controls import RecordingReviewRouter
 from ..config import Container, Settings, build_container
 from ..contacts import contact_catalogue, find_contact
 from ..domain.kernel import utcnow
@@ -78,13 +79,14 @@ def score_contact(
 
     Returns:
       A JSON-safe scorecard with every string masked for personal data (P-04: a tool result
-      goes into a model's context), plus ``review_ref``: where the escalation WENT. It is
-      empty only when the scorecard passed, so a caller can tell a routed escalation from a
-      flag nobody read.
+      goes into a model's context), plus ``review_ref``: where the escalation WENT, and
+      ``review_routing``: routed, failed, off or not_required. The reference is empty unless
+      the hand-off was routed, so a caller can tell a routed escalation from one that stopped.
     """
     container = _container(settings)
     contact = find_contact(container, contact_id)
-    scorecard = build_service(container).score_contact(
+    routing = RecordingReviewRouter(container.review_router)
+    scorecard = build_service(container, routing=routing).score_contact(
         contact,
         pack_for_contact(container, contact),
         actor=actor,
@@ -94,6 +96,7 @@ def score_contact(
     payload = _redacted(to_jsonable(scorecard))
     if not isinstance(payload, dict):  # pragma: no cover - dataclasses serialise to objects
         raise TypeError("a scorecard must serialise to a JSON object")
+    payload["review_routing"] = routing.outcome.value
     return payload
 
 

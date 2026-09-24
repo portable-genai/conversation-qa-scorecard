@@ -30,9 +30,10 @@ again on the way out, because a tool result becomes a model's context.
 
 It is HELD and ROUTED, not flagged. A scorecard that is not compliant sets
 `requires_human_review` and is submitted to the `human-review-console` in the same call that
-produced it (rule R8), on the API, the CLI and the agent surface alike. The managed router
-REFUSES when no console is configured rather than swallowing the escalation, so a deployment
-cannot ship with R8 unwired and look green. `tests/unit/test_review_routing.py` asserts the
+produced it (rule R8), on the API, the CLI and the agent surface alike. Under the managed
+profile, routing on with no console configured REFUSES TO BOOT, so a deployment cannot ship
+with R8 unwired and look green, and a hand-off that fails at request time is reported as
+`review_routing: "failed"` rather than read as reviewed. `tests/unit/test_review_routing.py` asserts the
 routing rather than the flag.
 
 ## Where does the data live, and is residency enforced or merely described?

@@ -67,6 +67,7 @@ from hex_service_kit.web import (
     make_require_service_caller,
 )
 
+from ..adapters.controls import RecordingReviewRouter
 from ..config import (
     LOCAL_PROFILE,
     Container,
@@ -307,9 +308,12 @@ def score_contact(
     it went. The maker is the verified principal, so the console knows who originated it.
     """
     container = _container()
+    # The hand-off never fails an already-scored contact; the response says what happened to
+    # it instead (the fleet's runtime-control contract).
+    routing = RecordingReviewRouter(container.review_router)
     try:
         contact = find_contact(container, request.contact_id)
-        scorecard = build_service(container).score_contact(
+        scorecard = build_service(container, routing=routing).score_contact(
             contact,
             pack_for_contact(container, contact),
             actor=principal.actor,
@@ -318,7 +322,7 @@ def score_contact(
         )
     except (TenantAccessDeniedError, ContactNotFoundError, ContactCatalogueUnavailableError) as exc:
         raise _domain_error(exc) from exc
-    return ScorecardResponse.from_domain(scorecard)
+    return ScorecardResponse.from_domain(scorecard, review_routing=routing.outcome.value)
 
 
 @app.get("/v1/scorecards/{scorecard_id}", response_model=ScorecardResponse, tags=["artifacts"])

@@ -66,9 +66,12 @@ Locked decisions, pinned stack, contracts. This document is the deepest authorit
 - **Maker-checker (P-06) and routing (R8)**: any scorecard whose disposition is not `compliant`
   sets `requires_human_review=True` AND is routed through `ReviewRouterPort` to the `human-review-console`
   inside the same call, in the DOMAIN service, so every surface inherits it. The flag alone is
-  not the escalation. The response carries `review_ref`, so a caller can tell a routed
-  escalation from one that stopped here. The managed adapter refuses to run with no console
-  configured rather than swallowing the escalation.
+  not the escalation. The response carries `review_ref` and `review_routing` (`routed`,
+  `failed`, `off`, `not_required`), so a caller can tell a routed escalation from one that
+  stopped here. Under the managed profile, routing on with no console configured refuses at
+  boot; `CONVQA_REVIEW_ROUTING=off` is the stated way to run without it. A hand-off that fails
+  at request time is reported as `failed` by the calling surface's recorder, and the scorecard
+  is still scored, audited and stored with an empty `review_ref`.
 - **Tenant isolation**: a scorecard is tenant-owned data. The store filters on tenant in the
   query for a listing and is deliberately UNFILTERED for a fetch by id, because the comparison
   against the VERIFIED principal belongs in the domain, where every surface inherits it. The
