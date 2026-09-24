@@ -13,6 +13,7 @@ import sys
 from hex_service_kit.logging import configure_logging
 from hex_service_kit.serialization import to_jsonable
 
+from ..adapters.controls import RecordingReviewRouter
 from ..config import build_container
 from ..contacts import contact_catalogue, find_contact, headline_for
 from ..domain.kernel import utcnow
@@ -58,7 +59,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "score":
         contact = find_contact(container, args.contact_id)
-        scorecard = build_service(container).score_contact(
+        routing = RecordingReviewRouter(container.review_router)
+        scorecard = build_service(container, routing=routing).score_contact(
             contact,
             pack_for_contact(container, contact),
             actor=args.actor,
@@ -66,9 +68,16 @@ def main(argv: list[str] | None = None) -> int:
             as_of=utcnow(),
         )
         if args.json:
-            print(json.dumps(to_jsonable(scorecard), indent=2, sort_keys=True))
+            document = to_jsonable(scorecard)
+            if isinstance(document, dict):
+                document["review_routing"] = routing.outcome.value
+            print(json.dumps(document, indent=2, sort_keys=True))
             return 0
         _print(scorecard)
+        # Rule R8 on the CLI path too: the routing happened in the domain service, through this
+        # surface's recorder, and this prints what happened to it. A surface that only printed
+        # the flag would be a second place for an escalation to stop.
+        print(f"  human review hand-off : {routing.outcome.value} {scorecard.review_ref}".rstrip())
         return 0
 
     if args.command == "read":
@@ -94,10 +103,9 @@ def _print(scorecard: object) -> None:
     print(f"  requires_human_review: {getattr(scorecard, 'requires_human_review', False)}")
     review_ref = getattr(scorecard, "review_ref", "")
     if review_ref:
-        # Rule R8 on the CLI path too: the routing happened in the domain service, and this
-        # prints WHERE it went. A surface that only printed the flag would be a second place
-        # for an escalation to stop.
-        print(f"  routed to human review: {review_ref}")
+        # WHERE the escalation went, as recorded on the scorecard. What happened to the
+        # hand-off on this call is printed by the scoring command itself.
+        print(f"  review reference: {review_ref}")
 
 
 if __name__ == "__main__":  # pragma: no cover

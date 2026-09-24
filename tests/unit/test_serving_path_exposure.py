@@ -45,6 +45,17 @@ from conversation_qa_scorecard.api.app import (
 from tests import REPO_ROOT
 from tests.conftest import reimport
 
+
+@pytest.fixture(autouse=True)
+def _managed_deployment_names_its_console(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A managed process with review routing on refuses to boot without a console.
+
+    These tests build the app under the managed profile to exercise identity, not routing, so
+    they name a console the way any managed deployment must.
+    """
+    monkeypatch.setenv("HUMAN_REVIEW_URL", "https://review.example.test")
+
+
 _PROFILE_ENV = "CONVQA_PROFILE"
 _TOKEN_ENV = "CONVQA_S2S_TOKEN"
 _INSECURE_DEMO_ENV = "CONVQA_ALLOW_INSECURE_DEMO"

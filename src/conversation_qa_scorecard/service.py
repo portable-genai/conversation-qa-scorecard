@@ -11,6 +11,7 @@ correct scorecards and would silently stop honouring rule R8.
 
 from __future__ import annotations
 
+from .adapters.controls import RecordingReviewRouter
 from .config import Container
 from .domain.ingestion import RedactedTranscript, redact_for_scoring
 from .domain.models import ContactRecord, ScorePack
@@ -19,13 +20,22 @@ from .domain.scorecard_service import ScorecardService
 from .score_pack import pack_for_market
 
 
-def build_service(container: Container) -> ScorecardService:
-    """Wire every port the scoring path needs. No surface may build a narrower one."""
+def build_service(
+    container: Container, *, routing: RecordingReviewRouter | None = None
+) -> ScorecardService:
+    """Wire every port the scoring path needs. No surface may build a narrower one.
+
+    ``routing`` is the caller's recording wrapper around the bound review router. A surface
+    that returns a scorecard passes one and reports its outcome (``review_routing``): the
+    wrapper turns a failed hand-off into ``failed`` and a logged warning rather than a failed,
+    unaudited scoring run, so the domain stays unchanged and the caller still says what
+    happened. Without one, the bound router is used directly.
+    """
     return ScorecardService(
         audit=container.audit,
         transcripts=container.transcription,
         store=container.scorecard_store,
-        review_router=container.review_router,
+        review_router=routing if routing is not None else container.review_router,
         tracer=container.tracer,
         narrator=container.narration,
         classifier=container.signal_classifier,

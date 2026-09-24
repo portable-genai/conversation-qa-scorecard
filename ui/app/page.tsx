@@ -23,6 +23,26 @@ const FAIL_TONE: Record<string, string> = {
   gap: "bad",
 };
 
+// What happened to the human-review hand-off, in the words the user needs. A scorecard that
+// escalated but is not queued must say so rather than read as reviewed.
+function reviewRoutingText(scorecard: Scorecard): string {
+  if (!scorecard.requires_human_review) {
+    return "No review needed. Nothing was manufactured for a clean contact.";
+  }
+  switch (scorecard.review_routing) {
+    case "routed":
+      return "Sent to the review console: " + (scorecard.review_ref || "");
+    case "failed":
+      return "Could not reach the review console; this contact is not queued for review.";
+    case "off":
+      return "Review routing is off in this deployment; this contact is not queued for review.";
+    default:
+      return scorecard.review_ref
+        ? "Routed to human review: " + scorecard.review_ref
+        : "Requires human review; this scorecard carries no review reference.";
+  }
+}
+
 interface CardSummary {
   name?: string;
   description?: string;
@@ -94,6 +114,9 @@ interface Scorecard {
   redaction_count: number;
   engine_version?: string;
   review_ref?: string;
+  // What happened to the human-review hand-off. Absent on a stored scorecard read back, which
+  // routes nothing.
+  review_routing?: "routed" | "failed" | "off" | "not_required" | null;
   findings: Finding[];
   signals: Signal[];
   citations: Citation[];
@@ -309,10 +332,8 @@ export default function Home() {
                 <span className="figure-label">identifiers masked</span>
               </div>
             </div>
-            <p className="hint">
-              {scorecard.requires_human_review
-                ? "Routed to human review: " + (scorecard.review_ref || "NOT ROUTED")
-                : "No review needed. Nothing was manufactured for a clean contact."}
+            <p className="hint" data-review-routing={scorecard.review_routing ?? undefined}>
+              {reviewRoutingText(scorecard)}
             </p>
           </section>
 
