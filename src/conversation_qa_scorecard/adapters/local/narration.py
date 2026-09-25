@@ -13,11 +13,18 @@ adapter a standing proof that the gate is not so strict it rejects a correct nar
 
 from __future__ import annotations
 
+from hex_service_kit import provenance
+
 from ...config import Settings
 from ...domain.models import Narration
 from ...ports.narration import NarrationBrief
 
 _MODEL = "offline-deterministic"
+
+#: What the offline stub reports as the model that answered (`X-Answered-By`). It is the same
+#: string ``Settings.generator_model`` reports under ``local``, so the console's model pill does
+#: not change name when the first answer arrives: the stub is what answered, before and after.
+STUB_MODEL = "deterministic-offline-stub"
 
 
 class LocalNarrator:
@@ -47,6 +54,7 @@ class LocalNarrator:
             f"Disclosure coverage {brief.disclosure_score:.2f}, "
             f"script adherence {brief.adherence_score:.2f}."
         )
+        provenance.note_model(STUB_MODEL)
         return Narration(
             headline=f"{verdict}: {brief.contact_id}",
             body=" ".join(sentences),

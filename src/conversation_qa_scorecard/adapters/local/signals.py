@@ -13,11 +13,18 @@ artifact, which is the exact failure mode the determinism rule exists to prevent
 
 from __future__ import annotations
 
+from hex_service_kit import provenance
+
 from ...config import Settings
 from ...domain.models import AdvisoryNote, SignalKind
 from ...ports.signals import SignalRequest
 
 _SOURCE = "offline-advisory"
+
+#: What the offline stub reports as the model that answered (`X-Answered-By`). It is the same
+#: string ``Settings.generator_model`` reports under ``local``, so the console's model pill does
+#: not change name when the first answer arrives: the stub is what answered, before and after.
+STUB_MODEL = "deterministic-offline-stub"
 
 
 class LocalSignalClassifier:
@@ -41,6 +48,7 @@ class LocalSignalClassifier:
                 f"Advisory only: no cue in the configured lexicon matched across {turns} "
                 "customer turns. This note changes no score and no verdict."
             )
+        provenance.note_model(STUB_MODEL)
         return (
             AdvisoryNote(
                 source=_SOURCE,

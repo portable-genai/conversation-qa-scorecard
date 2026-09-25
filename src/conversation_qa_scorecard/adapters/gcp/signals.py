@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import json
 
+from hex_service_kit import provenance
+
 from ...config import Settings
 from ...domain.models import AdvisoryNote, SignalKind
 from ...ports.signals import SignalRequest
@@ -67,12 +69,16 @@ class GeminiSignalClassifier:
             config={
                 "system_instruction": _SYSTEM_INSTRUCTION,
                 "response_mime_type": "application/json",
-                "temperature": 0.0,
+                # No temperature: the model writes an advisory SENTENCE, not a class or a score.
+                # The signal kind and the 0.0 confidence are fixed in code below and the verdict
+                # was decided deterministically, so nothing compares this output. Free sampling
+                # is an ABSENT temperature, never 1.0, because some models reject the parameter.
             },
         )
         note = _note(getattr(reply, "text", "") or "")
         if not note:
             return ()
+        provenance.note_model(model)
         return (
             AdvisoryNote(
                 source=model,

@@ -25,6 +25,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from hex_service_kit import provenance
+
 from ...config import Settings
 from ...domain.models import Narration
 from ...ports.narration import NarrationBrief
@@ -62,12 +64,16 @@ class GeminiNarrator:
             config={
                 "system_instruction": _SYSTEM_INSTRUCTION,
                 "response_mime_type": "application/json",
-                "temperature": 0.0,
+                # No temperature: narration restates decided figures in prose, and the grounding
+                # gate (not sampling) is what holds it to them. Free sampling is an ABSENT
+                # temperature, never 1.0, because some models reject the parameter outright.
             },
         )
         parsed = _parse(getattr(reply, "text", "") or "")
         if parsed is None:
             return None
+        # The model answered: name it on this response (`X-Answered-By`), not the configuration.
+        provenance.note_model(model)
         return Narration(
             headline=str(parsed.get("headline", "")),
             body=str(parsed.get("body", "")),
