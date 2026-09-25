@@ -22,7 +22,7 @@
 #
 # tag -> commit, and `tests/unit/test_repo_artifacts.py` proves each line against the tag
 # `pyproject.toml` names and against the other lockfile:
-#   hex-service-kit     v0.0.8 = 2cf15351dc968d908697b89237d4b5b42b1870a4
+#   hex-service-kit     v0.0.9 = 77bd9ca2afbf1c6bca897f24d8a36908f85d55cd
 #   agent-eval-kit      v0.0.3 = da2fbc9ae7c5f85175686710724430e0dd6351e2
 #   review-kit          v0.0.2 = dec72b6437fef1f011e6660734dfd3ff23767a9e
 #   pii-kit             v0.0.1 = 654493048a8434d645757cc916bb9d446313688f
@@ -55,7 +55,7 @@ distro==1.9.0
     # via google-genai
 fastapi==0.141.1
     # via hex-service-kit
-google-api-core==2.36.0
+google-api-core==2.39.0
     # via
     #   google-cloud-appengine-logging
     #   google-cloud-bigquery
@@ -64,7 +64,7 @@ google-api-core==2.36.0
     #   google-cloud-logging
     #   google-cloud-speech
     #   google-cloud-trace
-google-auth==2.58.0
+google-auth==2.58.1
     # via
     #   conversation-qa-scorecard
     #   google-api-core
@@ -81,14 +81,14 @@ google-cloud-appengine-logging==1.10.0
     # via google-cloud-logging
 google-cloud-audit-log==0.6.2
     # via google-cloud-logging
-google-cloud-bigquery==3.45.0
+google-cloud-bigquery==3.45.2
     # via conversation-qa-scorecard
 google-cloud-core==2.7.0
     # via
     #   google-cloud-bigquery
     #   google-cloud-firestore
     #   google-cloud-logging
-google-cloud-firestore==2.30.0
+google-cloud-firestore==2.32.0
     # via conversation-qa-scorecard
 google-cloud-logging==3.16.3
     # via conversation-qa-scorecard
@@ -96,13 +96,13 @@ google-cloud-speech==2.40.0
     # via conversation-qa-scorecard
 google-cloud-trace==1.20.0
     # via opentelemetry-exporter-gcp-trace
-google-crc32c==1.8.0
+google-crc32c==1.9.0
     # via google-resumable-media
-google-genai==2.23.0
+google-genai==2.25.0
     # via conversation-qa-scorecard
 google-resumable-media==2.10.2
     # via google-cloud-bigquery
-googleapis-common-protos==1.75.3
+googleapis-common-protos==1.75.4
     # via
     #   google-api-core
     #   google-cloud-audit-log
@@ -111,7 +111,7 @@ googleapis-common-protos==1.75.3
     #   opentelemetry-exporter-otlp-proto-http
 grpc-google-iam-v1==0.14.5
     # via google-cloud-logging
-grpcio==1.83.1
+grpcio==1.84.0
     # via
     #   google-api-core
     #   google-cloud-appengine-logging
@@ -122,13 +122,13 @@ grpcio==1.83.1
     #   googleapis-common-protos
     #   grpc-google-iam-v1
     #   grpcio-status
-grpcio-status==1.83.1
+grpcio-status==1.84.0
     # via google-api-core
 h11==0.16.0
     # via
     #   httpcore
     #   uvicorn
-hex-service-kit @ git+https://github.com/portable-genai/hex-service-kit@2cf15351dc968d908697b89237d4b5b42b1870a4
+hex-service-kit @ git+https://github.com/portable-genai/hex-service-kit@77bd9ca2afbf1c6bca897f24d8a36908f85d55cd
     # via conversation-qa-scorecard
 httpcore==1.0.9
     # via httpx
@@ -136,39 +136,45 @@ httpx==0.28.1
     # via
     #   agent-eval-kit
     #   google-genai
-idna==3.19
+idna==3.20
     # via
     #   anyio
     #   httpx
     #   requests
-opentelemetry-api==1.44.0
+opentelemetry-api==1.45.0
     # via
     #   google-api-core
     #   google-cloud-logging
     #   opentelemetry-exporter-gcp-trace
+    #   opentelemetry-exporter-http-transport
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-resourcedetector-gcp
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
 opentelemetry-exporter-gcp-trace==1.15.0
     # via hex-service-kit
-opentelemetry-exporter-otlp-proto-common==1.44.0
+opentelemetry-exporter-http-transport==0.66b0
     # via opentelemetry-exporter-otlp-proto-http
-opentelemetry-exporter-otlp-proto-http==1.44.0
+opentelemetry-exporter-otlp-common==0.66b0
+    # via opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-common==1.45.0
+    # via opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-http==1.45.0
     # via hex-service-kit
-opentelemetry-proto==1.44.0
+opentelemetry-proto==1.45.0
     # via
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-http
 opentelemetry-resourcedetector-gcp==1.14.0
     # via opentelemetry-exporter-gcp-trace
-opentelemetry-sdk==1.44.0
+opentelemetry-sdk==1.45.0
     # via
     #   hex-service-kit
     #   opentelemetry-exporter-gcp-trace
+    #   opentelemetry-exporter-otlp-common
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-resourcedetector-gcp
-opentelemetry-semantic-conventions==0.65b0
+opentelemetry-semantic-conventions==0.66b0
     # via opentelemetry-sdk
 packaging==26.3
     # via google-cloud-bigquery
@@ -182,7 +188,7 @@ proto-plus==1.28.4
     #   google-cloud-logging
     #   google-cloud-speech
     #   google-cloud-trace
-protobuf==7.36.1
+protobuf==7.36.2
     # via
     #   google-api-core
     #   google-cloud-appengine-logging
@@ -219,7 +225,6 @@ requests==2.34.2
     #   google-cloud-bigquery
     #   google-genai
     #   hex-service-kit
-    #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-resourcedetector-gcp
 review-kit @ git+https://github.com/portable-genai/review-kit@dec72b6437fef1f011e6660734dfd3ff23767a9e
     # via conversation-qa-scorecard
@@ -229,7 +234,7 @@ sniffio==1.3.1
     # via google-genai
 speech-lexicon-kit @ git+https://github.com/portable-genai/speech-lexicon-kit@368beec2c718f3445ac20786c4a488d20de4f098
     # via conversation-qa-scorecard
-starlette==1.6.0
+starlette==1.7.0
     # via
     #   fastapi
     #   hex-service-kit
@@ -254,9 +259,11 @@ typing-inspection==0.4.4
     # via
     #   fastapi
     #   pydantic
-urllib3==2.7.0
-    # via requests
-uvicorn==0.52.4
+urllib3==2.8.0
+    # via
+    #   opentelemetry-exporter-http-transport
+    #   requests
+uvicorn==0.54.0
     # via conversation-qa-scorecard
 websockets==16.1.1
     # via google-genai
