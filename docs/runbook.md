@@ -248,6 +248,28 @@ violation, a CMEK key destroy or update, and a Cloud Armor denial at the edge. A
 through `alert_notification_channels`; the serving edge refuses to plan without one, because an
 alert nobody receives is not an alert.
 
-There is deliberately no guardrail-block alert: this service binds no guardrail port yet (see
-the R1 row in `COMPLIANCE.md`), and a metric whose filter can never match reads as a green light
-nobody earned. Add it in the same commit that binds the guardrail.
+There is deliberately no guardrail-block alert yet: a block is logged (see below), not written to
+this service's own audit log, so the log-based-metric shape above does not fit it without adding a
+second signal path. Add one when a deployment needs it paged rather than read.
+
+### Guardrail (rule R1)
+
+`ports/guardrail.py` screens the two model-shaped calls this service makes, both advisory rather
+than consequential (`domain/scorecard_service.py`): the narration call's brief is screened INPUT
+before the narrator drafts anything, and its draft is screened OUTPUT before it is validated,
+audited or returned; the signal classifier's customer utterances are screened INPUT before it
+runs, and each returned advisory note is screened OUTPUT before it is attached to the scorecard.
+Under `gcp` the screen calls a regional Model Armor template (`config/settings.yaml`
+`model_armor.template_id`, on the regional host `model_armor.host`, never the global endpoint);
+`infra/terraform/model_armor.tf` creates that template, gated on
+`var.model_armor_full_capabilities` for the malicious-URI filter and multi-language detection,
+which not every region serves. Neither call is consequential, so a blocked direction degrades the
+SAME way an unreachable model already does: the narrator falls back to the deterministic summary
+and the classifier contributes no advisory colour, logged as a warning, never raised and never
+audited as a separate event -- the scorecard's own audit record is unaffected either way.
+
+`CONVQA_GUARDRAIL` switches the guardrail, read in the same three states as review routing: unset
+is on, `true`/`false` (or `on`/`off`) wins, and an emptied or unrecognised value refuses at boot.
+Off binds `DisabledGuardrail`, which allows everything unchanged, and logs one warning at
+startup. With the guardrail on and no Model Armor template configured, the managed profile
+REFUSES TO BOOT. Terraform states the switch as `guardrail_enabled`.

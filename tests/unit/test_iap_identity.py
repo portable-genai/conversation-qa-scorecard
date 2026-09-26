@@ -423,6 +423,11 @@ _REBOUND_SETTINGS = "\n".join(
         "review_url: ${HUMAN_REVIEW_URL:-}",
         "adapters:",
         *_offline_binding("audit", "audit:LocalAuditAdapter", "audit:OnPremAuditAdapter"),
+        *_offline_binding(
+            "guardrail",
+            "guardrail:LocalHeuristicGuardrailAdapter",
+            "guardrail:OnPremGuardrailAdapter",
+        ),
         "  identity:",
         f"    local: {_PKG}.adapters.local.identity:LocalIdentityAdapter",
         f"    gcp: {_PKG}.adapters.gcp.identity:IapIdentityAdapter",

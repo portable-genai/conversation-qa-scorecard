@@ -12,6 +12,7 @@
 # refused at plan time rather than reaching an apply.
 
 mock_provider "google" {}
+mock_provider "google-beta" {}
 
 
 # worm_locked has NO DEFAULT (variables.tf): the audit bucket's lock is irreversible, so a plan

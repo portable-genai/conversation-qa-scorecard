@@ -40,6 +40,7 @@ def build_service(
         narrator=container.narration,
         classifier=container.signal_classifier,
         warehouse=container.warehouse,
+        guardrail=container.guardrail,
     )
 
 
