@@ -14,6 +14,7 @@ locals {
   required_services = [
     # Called by a bound adapter (src/conversation_qa_scorecard/adapters/gcp/).
     "aiplatform.googleapis.com", # narration.py and signals.py (Gemini restates, never decides)
+    "modelarmor.googleapis.com", # guardrail.py: screens both generation calls (rule R1)
     "speech.googleapis.com",     # transcription.py (batch recogniser, word offsets)
     "firestore.googleapis.com",  # scorecard_store.py (tenant-scoped evidence)
     "bigquery.googleapis.com",   # warehouse.py (the flat row that carries no speech)

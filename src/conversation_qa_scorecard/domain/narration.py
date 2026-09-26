@@ -92,6 +92,27 @@ def allowed_figures(scorecard: Scorecard) -> frozenset[str]:
     return frozenset(tokens)
 
 
+def guardrail_input_text(brief: NarrationBrief) -> str:
+    """A stable text rendering of ``brief``, for the guardrail's INPUT screen (rule R1).
+
+    Not the exact bytes the adapter sends to the model (that payload is the adapter's own,
+    ``adapters/gcp/narration.py``): the guardrail screens the STEP, in the domain, so it needs
+    only the same figures a prompt-injection or jailbreak pattern would appear in, not a
+    byte-identical copy of the wire payload.
+    """
+    lines = [
+        f"contact_id: {brief.contact_id}",
+        f"market: {brief.market}",
+        f"disposition: {brief.disposition}",
+        f"severity: {brief.severity}",
+    ]
+    lines.extend(
+        f"failing: {req} {status} {sev}" for req, status, sev in brief.failing_requirements
+    )
+    lines.extend(f"cue: {cue_id} {kind}" for cue_id, kind in brief.detected_cues)
+    return "\n".join(lines)
+
+
 def narration_brief(scorecard: Scorecard) -> NarrationBrief:
     """Build the ONLY material a narrator is allowed to see. Already decided, already redacted."""
     return NarrationBrief(

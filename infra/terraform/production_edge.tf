@@ -118,6 +118,12 @@ resource "google_cloud_run_v2_service" "api" {
         name  = "CONVQA_REVIEW_ROUTING"
         value = tostring(var.review_routing_enabled)
       }
+      # The guardrail switch (rule R1), stated the same way: on in the reference, and off is a
+      # logged deployment choice rather than a silent one.
+      env {
+        name  = "CONVQA_GUARDRAIL"
+        value = tostring(var.guardrail_enabled)
+      }
       env {
         name  = "CONVQA_WAREHOUSE_TABLE"
         value = "${var.project_id}.${google_bigquery_dataset.scorecards.dataset_id}.${google_bigquery_table.scorecards.table_id}"

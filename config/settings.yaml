@@ -80,6 +80,17 @@ warehouse_table: ${CONVQA_WAREHOUSE_TABLE:-}
 # number and no verdict; a draft that mentions a figure the engine did not publish is discarded.
 narration_model: ${CONVQA_NARRATION_MODEL:-gemini-3.5-flash}
 
+# Rule R1: the Model Armor template the `gcp` guardrail adapter screens the narration and
+# signal-classifier calls' input and output through, and the regional host it calls (never the
+# global endpoint, P-05). `template_id` matches the template `infra/terraform/model_armor.tf`
+# creates, so a zero-edit render names a template its own Terraform provisions. Guardrail on
+# (CONVQA_GUARDRAIL, unset means on) under the managed profile REFUSES TO BOOT when template_id
+# is empty and the bound adapter is ModelArmorGuardrailAdapter; CONVQA_GUARDRAIL=off states the
+# guardrail off.
+model_armor:
+  template_id: ${CONVQA_MODEL_ARMOR_TEMPLATE:-conversation-qa-scorecard-guardrail}
+  host: ${CONVQA_MODEL_ARMOR_HOST:-modelarmor.asia-southeast1.rep.googleapis.com}
+
 # The per-port adapter map: the ONLY place a binding lives, so switching the whole stack is a
 # configuration change rather than a code edit. Every port must bind every profile; the loader
 # refuses a partial block and `tests/test_settings_file.py` fails the build if this drifts from
@@ -91,6 +102,13 @@ adapters:
     local: conversation_qa_scorecard.adapters.local.audit:LocalAuditAdapter
     gcp: conversation_qa_scorecard.adapters.gcp.audit:CloudAuditAdapter
     onprem: conversation_qa_scorecard.adapters.onprem.audit:OnPremAuditAdapter
+  # Rule R1: screens the narration and signal-classifier calls' input (before) and output
+  # (after). local is a deterministic heuristic stand-in; there is no offline emulator for
+  # Model Armor.
+  guardrail:
+    local: conversation_qa_scorecard.adapters.local.guardrail:LocalHeuristicGuardrailAdapter
+    gcp: conversation_qa_scorecard.adapters.gcp.guardrail:ModelArmorGuardrailAdapter
+    onprem: conversation_qa_scorecard.adapters.onprem.guardrail:OnPremGuardrailAdapter
   identity:
     local: conversation_qa_scorecard.adapters.local.identity:LocalIdentityAdapter
     gcp: conversation_qa_scorecard.adapters.gcp.identity:IapIdentityAdapter

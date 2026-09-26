@@ -29,6 +29,7 @@ locals {
   # signal models, which restate and classify and never produce a number or a verdict.
   app_roles = [
     "roles/aiplatform.user",              # narration.py, signals.py
+    "roles/modelarmor.user",              # guardrail.py: sanitizeUserPrompt/sanitizeModelResponse
     "roles/speech.client",                # transcription.py (batch recognise)
     "roles/datastore.user",               # scorecard_store.py (no datastore.owner)
     "roles/bigquery.dataEditor",          # warehouse.py (insert rows, not manage the project)
