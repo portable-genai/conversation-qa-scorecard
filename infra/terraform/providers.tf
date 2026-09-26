@@ -8,9 +8,9 @@
 #   P-02 (no lock-in): Terraform is the only place infrastructure is described. The app talks
 #         to ports, never to these resources.
 #
-# Only the GA google provider is required. Nothing in this stack needs google-beta: the beta
-# surface was a cdd-sow-research requirement (Model Armor templates), and this service has no guardrail
-# port, so carrying a second provider would be carrying an unused dependency.
+# The GA google provider covers everything but one resource: google_model_armor_template
+# (model_armor.tf, rule R1) is google-beta only on the pinned provider version. A vertical that
+# adds another beta-only resource keeps using this same provider rather than adding a third.
 
 terraform {
   required_version = ">= 1.9.0"
@@ -26,10 +26,19 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 6.0"
     }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~> 6.0"
+    }
   }
 }
 
 provider "google" {
+  project = var.project_id
+  region  = var.region # the selected, allowlisted region: pinned, never global
+}
+
+provider "google-beta" {
   project = var.project_id
   region  = var.region # the selected, allowlisted region: pinned, never global
 }

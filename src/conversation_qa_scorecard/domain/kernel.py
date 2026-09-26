@@ -30,6 +30,51 @@ class Decision(LenientStrEnum):
     ESCALATED = "escalated"  # routed to a human (maker-checker, P-06)
 
 
+# --------------------------------------------------------------------------- #
+# Safety (guardrail): the A1 Guardrail Gateway concerns, vertical-neutral (rule R1)
+# --------------------------------------------------------------------------- #
+class Direction(LenientStrEnum):
+    """Which leg of a generation call a guardrail screen covers."""
+
+    INPUT = "input"
+    OUTPUT = "output"
+
+
+class GuardrailCategory(LenientStrEnum):
+    """What kind of thing a guardrail finding names. A fork adds to this; it never removes."""
+
+    PROMPT_INJECTION = "prompt_injection"
+    JAILBREAK = "jailbreak"
+    SENSITIVE_DATA = "sensitive_data"
+    MALICIOUS_URL = "malicious_url"
+    OTHER = "other"
+
+
+@dataclass(frozen=True, slots=True)
+class GuardrailFinding:
+    """One thing a guardrail screen noticed, never the whole verdict on its own."""
+
+    category: GuardrailCategory
+    confidence: str  # "low" | "medium" | "high"
+    detail: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class GuardrailVerdict:
+    """What a guardrail screen decided about one direction of one generation call.
+
+    ``sanitized_text`` is the text to use going forward when ``allowed`` is True (it may equal
+    the input unchanged); it is ``None`` when the call is blocked, because a blocked call has no
+    safe text to substitute.
+    """
+
+    allowed: bool
+    direction: Direction
+    findings: tuple[GuardrailFinding, ...] = ()
+    sanitized_text: str | None = None
+    reason: str = ""
+
+
 @dataclass(frozen=True, slots=True)
 class Citation:
     """Provenance attached to a generated claim (source + optional locator)."""

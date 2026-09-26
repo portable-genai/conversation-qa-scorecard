@@ -46,6 +46,7 @@ from conversation_qa_scorecard.domain.kernel import (
     AuditEvent,
     Citation,
     Decision,
+    Direction,
     Severity,
 )
 from conversation_qa_scorecard.domain.models import (
@@ -148,6 +149,12 @@ class PortCase:
     detail: str
 
 
+#: The text every guardrail implementation is handed: benign, so the offline heuristic and a
+#: real Model Armor template both allow it (this canonical case proves the SCREEN answers, not
+#: that it blocks; the blocking path is its own unit test).
+CANONICAL_GUARDRAIL_TEXT = "please summarise the disclosure coverage for this contact"
+
+
 def _audit_invoke(adapter: Any) -> Any:
     return adapter.record(CANONICAL_EVENT)
 
@@ -155,6 +162,14 @@ def _audit_invoke(adapter: Any) -> Any:
 def _audit_answered(adapter: Any, _result: Any) -> bool:
     stored = adapter.log.read_all()
     return bool(stored) and stored[-1]["actor"] == sample_cases.ACTOR and adapter.verify().ok
+
+
+def _guardrail_invoke(adapter: Any) -> Any:
+    return adapter.screen(CANONICAL_GUARDRAIL_TEXT, Direction.INPUT)
+
+
+def _guardrail_answered(_adapter: Any, result: Any) -> bool:
+    return bool(result.allowed) and result.direction is Direction.INPUT
 
 
 def _identity_invoke(adapter: Any) -> Any:
@@ -249,6 +264,13 @@ CANONICAL_CALLS: dict[str, PortCase] = {
         # The lazy `google.cloud` import is the first thing the managed sink does.
         managed_refusal=(ImportError,),
         detail="write one already-redacted WORM record",
+    ),
+    "guardrail": PortCase(
+        invoke=_guardrail_invoke,
+        answered=_guardrail_answered,
+        # The lazy `google.cloud.modelarmor` import is the first thing the managed screen does.
+        managed_refusal=(ImportError,),
+        detail="screen one direction of a generation call",
     ),
     "identity": PortCase(
         invoke=_identity_invoke,
