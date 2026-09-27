@@ -14,17 +14,21 @@ rules below are true everywhere rather than true in whichever surface remembered
    advisory notes and no narration and produces the consequential answer. The classifier and
    the narrator run afterwards and are attached to fields the engine never reads. Both are
    best-effort: an unreachable model changes nothing about the verdict.
-6. **Rule R1: the guardrail screens both generation calls, both directions.** The text handed
-   to the narrator and the classifier is screened INPUT before the call, and what comes back is
-   screened OUTPUT before it is attached to the scorecard. Neither call is consequential (see
-   3 above), so a block degrades the SAME way an unreachable model already does: the narrator
-   falls back to the deterministic summary and the classifier contributes no advisory colour,
-   logged, never raised.
 4. **Rule R8: a failing scorecard is ROUTED, in the same call that produced it.** Setting
    ``requires_human_review`` is not the escalation; routing is. The routed reference is stored
    on the scorecard so a caller can tell a routed escalation from a flag that stopped here.
 5. **Redact before the audit write.** The audit summary is built from the engine's figures and
    masked again on the way in, so the immutable record can never carry an identifier.
+6. **Rule R1: the guardrail screens both generation calls, both directions.** The prompt each
+   call sends is screened INPUT before the call, exactly as sent (``narration_prompt`` /
+   ``signal_prompt``, the same functions the managed adapters send), so every caller-controlled
+   field in it (the contact id, the market, the customer's own words) is screened. What comes
+   back is screened OUTPUT before it is validated, attached, audited or returned, and the text
+   the screen hands back is the text used from then on. A refusal, including a guardrail that
+   raised instead of deciding (fail closed), is audited ``Decision.BLOCKED`` and the model's
+   text is never used: the narrator falls back to the deterministic summary (fixed text built
+   from the engine's figures) and the classifier contributes no advisory note. Both calls are
+   optional by design (rule 3), so that fallback is the whole answer, never a partial one.
 
 Nothing here computes a score, a status or a disposition. That is all in ``scoring_engine.py``,
 which is pure and takes an explicit ``as_of``.
@@ -32,7 +36,6 @@ which is pure and takes an explicit ``as_of``.
 
 from __future__ import annotations
 
-import logging
 from dataclasses import replace
 from datetime import datetime
 
@@ -41,16 +44,16 @@ from speech_lexicon_kit import ChannelRole, Transcript
 
 from ..ports.audit import AuditSinkPort
 from ..ports.guardrail import GuardrailPort
-from ..ports.narration import NarrationPort
+from ..ports.narration import NarrationPort, narration_prompt
 from ..ports.observability import ObservabilityTracerPort
 from ..ports.review_router import ReviewRouterPort
 from ..ports.scorecard_store import ScorecardStorePort
-from ..ports.signals import SignalClassifierPort, SignalRequest
+from ..ports.signals import SignalClassifierPort, SignalRequest, signal_prompt
 from ..ports.speech import TranscriptSourcePort
 from ..ports.warehouse import WarehouseExportPort
 from .errors import ScorecardNotFoundError, TenantAccessDeniedError
 from .ingestion import redact_for_scoring
-from .kernel import AuditEvent, Decision, Direction
+from .kernel import AuditEvent, Decision, Direction, GuardrailVerdict
 from .models import (
     AdvisoryNote,
     ContactRecord,
@@ -60,12 +63,7 @@ from .models import (
     ScorePack,
     ScoringRequest,
 )
-from .narration import (
-    deterministic_narration,
-    grounded_or_fallback,
-    guardrail_input_text,
-    narration_brief,
-)
+from .narration import deterministic_narration, grounded_or_fallback, narration_brief
 from .pii import PII_PATTERNS
 from .scoring_engine import ScoringEngine
 from .serialization import scorecard_to_row
@@ -78,7 +76,14 @@ _MAX_CLASSIFIER_UTTERANCES = 40
 #: One span per scored contact. Structural attributes only: see :meth:`score_contact`.
 _SCORE_SPAN = "scorecard.score_contact"
 
-_log = logging.getLogger(__name__)
+#: The two generation steps rule R1 screens, as named in a BLOCKED audit record, and what the
+#: service used in place of the refused model text.
+_NARRATION_STEP = "narration"
+_CLASSIFIER_STEP = "signal_classifier"
+_FALLBACK: dict[str, str] = {
+    _NARRATION_STEP: "the deterministic summary stands",
+    _CLASSIFIER_STEP: "no advisory note attached",
+}
 
 
 class ScorecardService:
@@ -92,11 +97,11 @@ class ScorecardService:
         store: ScorecardStorePort,
         review_router: ReviewRouterPort,
         tracer: ObservabilityTracerPort,
+        guardrail: GuardrailPort,
         narrator: NarrationPort | None = None,
         classifier: SignalClassifierPort | None = None,
         warehouse: WarehouseExportPort | None = None,
         engine: ScoringEngine | None = None,
-        guardrail: GuardrailPort | None = None,
     ) -> None:
         self._audit = audit
         self._transcripts = transcripts
@@ -107,11 +112,9 @@ class ScorecardService:
         self._classifier = classifier
         self._warehouse = warehouse
         self._engine = engine or ScoringEngine()
-        #: Rule R1. ``None`` means no screening (a test that builds the service directly and
-        #: does not care about the guardrail); every real caller passes one via
-        #: ``service.build_service``, which is the bound adapter or, with the switch off,
-        #: :class:`~..adapters.controls.DisabledGuardrail` -- itself a working pass-through, not
-        #: a ``None``.
+        #: Rule R1. Required, never optional: a service built without a screen would run both
+        #: generation calls unscreened. With the switch off the container binds
+        #: :class:`~..adapters.controls.DisabledGuardrail`, a stated pass-through, not a gap.
         self._guardrail = guardrail
 
     # ------------------------------------------------------------------ #
@@ -163,8 +166,8 @@ class ScorecardService:
             # The CONSEQUENTIAL result: no advisory notes, no narration, no model of any kind.
             decided = self._engine.score(request, redacted.transcript)
 
-            advisory = self._advisory(contact, pack, redacted.transcript, decided)
-            narration = self._narrate(decided)
+            advisory = self._advisory(contact, pack, redacted.transcript, decided, actor=actor)
+            narration = self._narrate(decided, actor=actor)
             scorecard = replace(decided, advisory=advisory, narration=narration)
 
             review_ref = ""
@@ -222,6 +225,8 @@ class ScorecardService:
         pack: ScorePack,
         transcript: Transcript,
         decided: Scorecard,
+        *,
+        actor: str,
     ) -> tuple[AdvisoryNote, ...]:
         """Ask the bound classifier for colour. Any failure means no colour, never no verdict."""
         if self._classifier is None:
@@ -231,63 +236,156 @@ class ScorecardService:
             for turn in transcript.turns
             if turn.role is ChannelRole.CUSTOMER and turn.text.strip()
         )[:_MAX_CLASSIFIER_UTTERANCES]
-        # Rule R1: screen INPUT before the classifier sees any customer text at all.
-        if self._guardrail is not None and utterances:
-            in_verdict = self._guardrail.screen("\n".join(utterances), Direction.INPUT)
-            if not in_verdict.allowed:
-                _log.warning("signal classifier input blocked by guardrail: %s", in_verdict.reason)
-                return ()
         request = SignalRequest(
             contact_id=contact.contact_id,
             locale=pack.locale,
             customer_utterances=utterances,
             detected_cue_ids=tuple(s.cue_id for s in decided.signals if s.detected),
         )
+        # Rule R1, INPUT: the prompt exactly as the classifier sends it, before any customer
+        # text reaches a model.
+        prompt = signal_prompt(request)
+        screened_prompt = self._screen(
+            prompt, Direction.INPUT, step=_CLASSIFIER_STEP, decided=decided, actor=actor
+        )
+        if screened_prompt is None or not self._unchanged(
+            screened_prompt, prompt, step=_CLASSIFIER_STEP, decided=decided, actor=actor
+        ):
+            return ()
         try:
             notes = tuple(self._classifier.classify(request))
         except Exception:
             # An advisory sentence is not worth failing a compliance assessment for. The
             # verdict was complete before this call and is unchanged by its absence.
             return ()
-        if self._guardrail is None:
-            return notes
-        # Rule R1: screen OUTPUT before an advisory note is attached to the scorecard.
+        # Rule R1, OUTPUT: every note before it is attached to the scorecard, and the screened
+        # text is the text attached. A refused note is dropped; an emptied one says nothing.
         screened: list[AdvisoryNote] = []
         for note in notes:
-            out_verdict = self._guardrail.screen(note.text, Direction.OUTPUT)
-            if not out_verdict.allowed:
-                _log.warning(
-                    "signal classifier output blocked by guardrail: %s", out_verdict.reason
-                )
-                continue
-            screened.append(replace(note, text=out_verdict.sanitized_text or note.text))
+            text = self._screen(
+                note.text, Direction.OUTPUT, step=_CLASSIFIER_STEP, decided=decided, actor=actor
+            )
+            if text:
+                screened.append(replace(note, text=text))
         return tuple(screened)
 
-    def _narrate(self, decided: Scorecard) -> Narration:
+    def _narrate(self, decided: Scorecard, *, actor: str) -> Narration:
         """Draft a narrative, validate it against the engine's figures, else fall back."""
         if self._narrator is None:
             return deterministic_narration(decided)
         brief = narration_brief(decided)
-        # Rule R1: screen INPUT before the narrator drafts anything from the brief.
-        if self._guardrail is not None:
-            in_verdict = self._guardrail.screen(guardrail_input_text(brief), Direction.INPUT)
-            if not in_verdict.allowed:
-                _log.warning("narration input blocked by guardrail: %s", in_verdict.reason)
-                return deterministic_narration(decided)
+        # Rule R1, INPUT: the prompt exactly as the narrator sends it, before any drafting.
+        prompt = narration_prompt(brief)
+        screened_prompt = self._screen(
+            prompt, Direction.INPUT, step=_NARRATION_STEP, decided=decided, actor=actor
+        )
+        if screened_prompt is None or not self._unchanged(
+            screened_prompt, prompt, step=_NARRATION_STEP, decided=decided, actor=actor
+        ):
+            return deterministic_narration(decided)
         try:
             draft = self._narrator.narrate(brief)
         except Exception:
             draft = None
-        # Rule R1: screen OUTPUT before a draft is validated, audited or returned. A blocked
-        # draft is discarded exactly like a rejected one: the fallback stands.
-        if draft is not None and self._guardrail is not None:
-            out_verdict = self._guardrail.screen(
-                f"{draft.headline}\n{draft.body}", Direction.OUTPUT
+        if draft is None:
+            return grounded_or_fallback(None, brief, decided)
+        # Rule R1, OUTPUT: headline and body before the draft is validated, audited or
+        # returned, and the screened text is the text validated. A refusal in either discards
+        # the whole draft: the deterministic summary stands, exactly as for a rejected draft.
+        headline = self._screen(
+            draft.headline, Direction.OUTPUT, step=_NARRATION_STEP, decided=decided, actor=actor
+        )
+        body = (
+            None
+            if headline is None
+            else self._screen(
+                draft.body, Direction.OUTPUT, step=_NARRATION_STEP, decided=decided, actor=actor
             )
-            if not out_verdict.allowed:
-                _log.warning("narration output blocked by guardrail: %s", out_verdict.reason)
-                draft = None
-        return grounded_or_fallback(draft, brief, decided)
+        )
+        if headline is None or body is None:
+            return deterministic_narration(decided)
+        return grounded_or_fallback(replace(draft, headline=headline, body=body), brief, decided)
+
+    # ------------------------------------------------------------------ #
+    # The guardrail (rule R1)
+    # ------------------------------------------------------------------ #
+    def _screen(
+        self,
+        text: str,
+        direction: Direction,
+        *,
+        step: str,
+        decided: Scorecard,
+        actor: str,
+    ) -> str | None:
+        """Screen one text; return the text to use from here on, or ``None`` after a refusal.
+
+        The returned text is the verdict's ``sanitized_text`` exactly as given, including an
+        empty string: a screen that redacted everything has not asked for the original back.
+        A block, and a guardrail that raised instead of deciding, are both refusals (fail
+        closed): each is audited BLOCKED before ``None`` tells the caller to fall back.
+        """
+        try:
+            verdict: GuardrailVerdict = self._guardrail.screen(text, direction)
+        except Exception as exc:
+            self._audit_blocked(
+                step, direction, f"guardrail unavailable ({type(exc).__name__})", decided, actor
+            )
+            return None
+        if not verdict.allowed or verdict.sanitized_text is None:
+            reason = verdict.reason or f"{step} {direction.value} blocked by guardrail"
+            self._audit_blocked(step, direction, reason, decided, actor)
+            return None
+        return verdict.sanitized_text
+
+    def _unchanged(
+        self, screened: str, sent: str, *, step: str, decided: Scorecard, actor: str
+    ) -> bool:
+        """True when an INPUT screen handed the prompt back unchanged; a rewrite is refused.
+
+        The model adapters build their request from the structured brief or request, not from
+        a string the domain passes them, so a prompt the screen rewrote could not be the one
+        sent. Sending the unscreened original instead would defeat the screen, so a rewrite is
+        audited BLOCKED like a match. Neither bound screen rewrites a prompt today (Model Armor
+        reports a decision for these filters, the local heuristic allows or blocks).
+        """
+        if screened == sent:
+            return True
+        self._audit_blocked(
+            step,
+            Direction.INPUT,
+            "the guardrail rewrote the prompt; only an unchanged prompt can be sent",
+            decided,
+            actor,
+        )
+        return False
+
+    def _audit_blocked(
+        self, step: str, direction: Direction, reason: str, decided: Scorecard, actor: str
+    ) -> None:
+        """Audit a guardrail refusal (rule R1/R2) BEFORE the caller falls back.
+
+        Never carries the refused text: only which generation step was refused, in which
+        direction, why, and what stood in its place. It names the scorecard by its id, which
+        the engine derives, rather than by the contact id, which the caller supplied and which
+        may itself be what was refused.
+        """
+        fallback = _FALLBACK[step]
+        self._audit.record(
+            AuditEvent(
+                action=f"{step}_screen",
+                actor=actor,
+                decision=Decision.BLOCKED,
+                severity=decided.severity,
+                redacted_summary=redact(
+                    f"{decided.scorecard_id}: {step} {direction.value} blocked: {reason}; "
+                    f"{fallback}",
+                    PII_PATTERNS,
+                ),
+                citations=(),
+                timestamp=decided.as_of,
+            )
+        )
 
     # ------------------------------------------------------------------ #
     # Audit

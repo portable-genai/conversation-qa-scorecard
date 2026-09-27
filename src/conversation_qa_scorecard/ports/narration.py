@@ -25,8 +25,9 @@ placeholder that refuses.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from ..domain.models import Narration
 
@@ -54,6 +55,31 @@ class NarrationBrief:
     citation_ids: tuple[str, ...] = ()
     allowed_figures: frozenset[str] = field(default_factory=frozenset)
     locale: str = ""
+
+
+def narration_prompt(brief: NarrationBrief) -> str:
+    """The prompt a model narrator is sent for ``brief``: the exact string, not a rendering of it.
+
+    One definition, used by the managed adapter as its request ``contents`` and by the domain as
+    the text the guardrail's INPUT screen sees (rule R1), so what was screened is byte for byte
+    what the model reads. Decided figures, already redacted, and nothing else: every field a
+    caller controls (the contact id, the market) reaches the model through this string, so it
+    is screened with it.
+    """
+    payload: dict[str, Any] = {
+        "contact_id": brief.contact_id,
+        "market": brief.market,
+        "disposition": brief.disposition,
+        "severity": brief.severity,
+        "disclosure_score": brief.disclosure_score,
+        "adherence_score": brief.adherence_score,
+        "sentiment_score": brief.sentiment_score,
+        "failing_requirements": [list(item) for item in brief.failing_requirements],
+        "detected_cues": [list(item) for item in brief.detected_cues],
+        "citation_ids": list(brief.citation_ids),
+        "allowed_figures": sorted(brief.allowed_figures),
+    }
+    return json.dumps(payload, sort_keys=True)
 
 
 @runtime_checkable

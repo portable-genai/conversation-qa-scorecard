@@ -62,6 +62,7 @@ google-api-core==2.39.0
     #   google-cloud-core
     #   google-cloud-firestore
     #   google-cloud-logging
+    #   google-cloud-modelarmor
     #   google-cloud-speech
     #   google-cloud-trace
 google-auth==2.58.1
@@ -73,6 +74,7 @@ google-auth==2.58.1
     #   google-cloud-core
     #   google-cloud-firestore
     #   google-cloud-logging
+    #   google-cloud-modelarmor
     #   google-cloud-speech
     #   google-cloud-trace
     #   google-genai
@@ -91,6 +93,8 @@ google-cloud-core==2.7.0
 google-cloud-firestore==2.32.0
     # via conversation-qa-scorecard
 google-cloud-logging==3.16.3
+    # via conversation-qa-scorecard
+google-cloud-modelarmor==0.7.1
     # via conversation-qa-scorecard
 google-cloud-speech==2.40.0
     # via conversation-qa-scorecard
@@ -117,6 +121,7 @@ grpcio==1.84.0
     #   google-cloud-appengine-logging
     #   google-cloud-firestore
     #   google-cloud-logging
+    #   google-cloud-modelarmor
     #   google-cloud-speech
     #   google-cloud-trace
     #   googleapis-common-protos
@@ -186,6 +191,7 @@ proto-plus==1.28.4
     #   google-cloud-appengine-logging
     #   google-cloud-firestore
     #   google-cloud-logging
+    #   google-cloud-modelarmor
     #   google-cloud-speech
     #   google-cloud-trace
 protobuf==7.36.2
@@ -195,6 +201,7 @@ protobuf==7.36.2
     #   google-cloud-audit-log
     #   google-cloud-firestore
     #   google-cloud-logging
+    #   google-cloud-modelarmor
     #   google-cloud-speech
     #   google-cloud-trace
     #   googleapis-common-protos

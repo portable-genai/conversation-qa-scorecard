@@ -25,7 +25,7 @@ from hex_service_kit import provenance
 
 from ...config import Settings
 from ...domain.models import AdvisoryNote, SignalKind
-from ...ports.signals import SignalRequest
+from ...ports.signals import SignalRequest, signal_prompt
 
 _SYSTEM_INSTRUCTION = (
     "You add ONE short advisory sentence about the tone of a customer's turns, for a "
@@ -59,13 +59,7 @@ class GeminiSignalClassifier:
         client = genai.Client(vertexai=True, location=self._settings.region)
         reply = client.models.generate_content(
             model=model,
-            contents=json.dumps(
-                {
-                    "locale": request.locale,
-                    "customer_utterances": list(request.customer_utterances),
-                },
-                sort_keys=True,
-            ),
+            contents=signal_prompt(request),
             config={
                 "system_instruction": _SYSTEM_INSTRUCTION,
                 "response_mime_type": "application/json",

@@ -18,16 +18,22 @@ _INJ = GuardrailCategory.PROMPT_INJECTION
 _JB = GuardrailCategory.JAILBREAK
 
 # (pattern, category). Any match blocks the request; the checks are intentionally cheap and
-# offline, never a claim to match what the managed service screens for.
+# offline, never a claim to match what the managed service screens for. Each is bounded by word
+# boundaries, and each is case-insensitive except where CASE is the signal: a heuristic that
+# refuses a customer called Dan, or "the system prompted me to reset", blocks ordinary cases.
 _INJECTION_PATTERNS: tuple[tuple[re.Pattern[str], GuardrailCategory], ...] = (
-    (re.compile(r"ignore\s+(all\s+)?previous\s+instructions", re.I), _INJ),
-    (re.compile(r"disregard\s+(all\s+)?(prior|previous)\s+", re.I), _INJ),
-    (re.compile(r"system\s+prompt", re.I), _INJ),
+    (re.compile(r"\bignore\s+(all\s+)?(the\s+)?previous\s+instructions\b", re.I), _INJ),
+    (re.compile(r"\bdisregard\s+(all\s+)?(the\s+)?(prior|previous)\s+", re.I), _INJ),
+    # The NOUN phrase, not the verb: "system prompts" is a target, "system prompted" is not.
+    (re.compile(r"\bsystem\s+prompts?\b", re.I), _INJ),
     (re.compile(r"\bexfiltrat", re.I), _INJ),
-    (re.compile(r"reveal\s+(your\s+)?(secret|api\s*key|credential)", re.I), _INJ),
-    (re.compile(r"\bjailbreak\b", re.I), _JB),
-    (re.compile(r"\bDAN\b", re.I), _JB),
-    (re.compile(r"override\s+(your\s+)?safety", re.I), _JB),
+    (re.compile(r"\breveal\s+(your\s+)?(secret|api\s*key|credential)", re.I), _INJ),
+    (re.compile(r"\bjailbreak", re.I), _JB),
+    # The "DAN" persona is written in capitals; the given name Dan is not, so this one is
+    # case-SENSITIVE. The persona's own expansion is matched in any case.
+    (re.compile(r"\bDAN\b"), _JB),
+    (re.compile(r"\bdo\s+anything\s+now\b", re.I), _JB),
+    (re.compile(r"\boverride\s+(your\s+)?safety", re.I), _JB),
 )
 
 

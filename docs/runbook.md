@@ -248,25 +248,32 @@ violation, a CMEK key destroy or update, and a Cloud Armor denial at the edge. A
 through `alert_notification_channels`; the serving edge refuses to plan without one, because an
 alert nobody receives is not an alert.
 
-There is deliberately no guardrail-block alert yet: a block is logged (see below), not written to
-this service's own audit log, so the log-based-metric shape above does not fit it without adding a
-second signal path. Add one when a deployment needs it paged rather than read.
+There is deliberately no guardrail-block alert: a block is the control working, not the posture
+slipping, and it never changes a verdict. Every block IS in this service's audit log (see below),
+as `jsonPayload.decision="blocked"`, so a deployment that wants one paged adds a metric in the
+same shape as the critical-escalation one above rather than a second signal path.
 
 ### Guardrail (rule R1)
 
-`ports/guardrail.py` screens the two model-shaped calls this service makes, both advisory rather
-than consequential (`domain/scorecard_service.py`): the narration call's brief is screened INPUT
-before the narrator drafts anything, and its draft is screened OUTPUT before it is validated,
-audited or returned; the signal classifier's customer utterances are screened INPUT before it
-runs, and each returned advisory note is screened OUTPUT before it is attached to the scorecard.
+`ports/guardrail.py` screens the two generation calls this service makes, both advisory rather
+than consequential (`domain/scorecard_service.py`). INPUT is the prompt exactly as the managed
+adapter sends it (`narration_prompt` / `signal_prompt`, the same functions the adapters call), so
+every caller-controlled field in it, the contact id, the market and the customer's own words, is
+screened before a model sees it. OUTPUT is the narrator's headline and body before the draft is
+validated, audited or returned, and each advisory note before it is attached; the screened text
+is the text used.
 Under `gcp` the screen calls a regional Model Armor template (`config/settings.yaml`
 `model_armor.template_id`, on the regional host `model_armor.host`, never the global endpoint);
 `infra/terraform/model_armor.tf` creates that template, gated on
 `var.model_armor_full_capabilities` for the malicious-URI filter and multi-language detection,
-which not every region serves. Neither call is consequential, so a blocked direction degrades the
-SAME way an unreachable model already does: the narrator falls back to the deterministic summary
-and the classifier contributes no advisory colour, logged as a warning, never raised and never
-audited as a separate event -- the scorecard's own audit record is unaffected either way.
+which not every region serves. Each sanitize call carries a deadline
+(`model_armor.timeout_seconds`), and the adapter allows only a complete, clean screen
+(`NO_MATCH_FOUND` with every filter run); anything else, an API error or a timeout included, is a
+refusal. A refusal is audited `decision="blocked"` (action `narration_screen` or
+`signal_classifier_screen`, naming the scorecard id, the direction and the reason, never the
+refused text) and the model's text is not used: the narrator falls back to the deterministic
+summary and the classifier attaches no advisory note. Both calls are optional by design, so the
+scorecard, its verdict and its own audit record are unaffected either way.
 
 `CONVQA_GUARDRAIL` switches the guardrail, read in the same three states as review routing: unset
 is on, `true`/`false` (or `on`/`off`) wins, and an emptied or unrecognised value refuses at boot.
