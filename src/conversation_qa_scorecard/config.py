@@ -468,10 +468,21 @@ class ModelArmorSettings:
     one ``infra/terraform/model_armor.tf`` creates, so a zero-edit render names a template its
     own Terraform provisions rather than an empty string nothing would ever satisfy. ``host`` is
     the regional endpoint (never the global one), pinned to the region this repo runs in.
+    ``timeout_seconds`` is the deadline on every sanitize call: without one a stalled backend
+    holds the request for the client library's own default, and the guardrail fails CLOSED on
+    the timeout like on any other error, so a short deadline refuses rather than admits.
     """
 
     template_id: str = "conversation-qa-scorecard-guardrail"
     host: str = f"modelarmor.{_REGION}.rep.googleapis.com"
+    timeout_seconds: float = 10.0
+
+    def __post_init__(self) -> None:
+        value = self.timeout_seconds
+        if isinstance(value, bool) or not isinstance(value, int | float) or value <= 0:
+            raise ValueError(
+                f"model_armor.timeout_seconds must be a positive number of seconds, got {value!r}"
+            )
 
 
 @dataclass(frozen=True, slots=True)

@@ -882,6 +882,12 @@ def _exit_narration(container: Any) -> Any:
     return container.narration.narrate(narration_brief(_exit_scorecard()))
 
 
+def _exit_guardrail(container: Any) -> Any:
+    return container.guardrail.screen(
+        "please summarise the disclosure coverage", kernel.Direction.INPUT
+    )
+
+
 def _exit_signals(container: Any) -> Any:
     return container.signal_classifier.classify(
         SignalRequest(contact_id=BREACH_CONTACT, locale="en-SG", customer_utterances=("hello",))
@@ -910,6 +916,7 @@ def _exit_evaluation(container: Any) -> Any:
 #: was skipping the seam whose exit behaviour matters most.
 EXIT_CALLS: dict[str, Callable[[Any], Any]] = {
     "audit": _exit_audit,
+    "guardrail": _exit_guardrail,
     "identity": _exit_identity,
     "narration": _exit_narration,
     "review_router": _exit_review,

@@ -8,7 +8,7 @@
 #
 # Every filter below names a field this deployment actually emits:
 #   - critical_escalations : the managed audit adapter writes AuditEvent as a struct payload,
-#     so jsonPayload.decision is "escalated" or "allowed" (domain/kernel.py Decision) and
+#     so jsonPayload.decision is "escalated", "allowed" or "blocked" (domain/kernel.py Decision) and
 #     jsonPayload.severity carries the band. A critical escalation is a maker-checker event a
 #     reviewer has to see; the deterministic engine decided it, so it is never noise.
 #   - sa_key_creation : an exportable service-account key was created. Org policy should have

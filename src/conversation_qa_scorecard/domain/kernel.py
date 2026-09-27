@@ -28,6 +28,7 @@ class Severity(LenientStrEnum):
 class Decision(LenientStrEnum):
     ALLOWED = "allowed"
     ESCALATED = "escalated"  # routed to a human (maker-checker, P-06)
+    BLOCKED = "blocked"  # a generation call refused by the guardrail (rule R1); text never used
 
 
 # --------------------------------------------------------------------------- #
@@ -63,9 +64,9 @@ class GuardrailFinding:
 class GuardrailVerdict:
     """What a guardrail screen decided about one direction of one generation call.
 
-    ``sanitized_text`` is the text to use going forward when ``allowed`` is True (it may equal
-    the input unchanged); it is ``None`` when the call is blocked, because a blocked call has no
-    safe text to substitute.
+    ``sanitized_text`` is the text to use going forward when ``allowed`` is True, exactly as given
+    (it may equal the input unchanged, or be empty when everything was redacted); it is ``None``
+    when the call is blocked, because a blocked call has no safe text to substitute.
     """
 
     allowed: bool

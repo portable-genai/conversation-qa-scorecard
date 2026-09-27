@@ -192,6 +192,7 @@ def test_the_denial_test_goes_RED_when_the_domain_check_is_removed() -> None:
         store=container.scorecard_store,
         review_router=container.review_router,
         tracer=container.tracer,
+        guardrail=container.guardrail,
     )
     assert leaky.fetch(theirs.scorecard_id, tenant=sample_cases.TENANT) == theirs, (
         "the mutant did not leak, so the real test is not testing what it claims to"

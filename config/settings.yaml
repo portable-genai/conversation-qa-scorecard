@@ -90,6 +90,9 @@ narration_model: ${CONVQA_NARRATION_MODEL:-gemini-3.5-flash}
 model_armor:
   template_id: ${CONVQA_MODEL_ARMOR_TEMPLATE:-conversation-qa-scorecard-guardrail}
   host: ${CONVQA_MODEL_ARMOR_HOST:-modelarmor.asia-southeast1.rep.googleapis.com}
+  # The deadline on every sanitize call. A timeout fails CLOSED (audited BLOCKED, model text
+  # unused).
+  timeout_seconds: 10.0
 
 # The per-port adapter map: the ONLY place a binding lives, so switching the whole stack is a
 # configuration change rather than a code edit. Every port must bind every profile; the loader

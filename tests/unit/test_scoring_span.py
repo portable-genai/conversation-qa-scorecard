@@ -51,6 +51,7 @@ def _score(contact_id: str) -> _RecordingTracer:
         transcripts=container.transcription,
         store=container.scorecard_store,
         review_router=container.review_router,
+        guardrail=container.guardrail,
         tracer=tracer,  # type: ignore[arg-type]
     )
     source = container.transcription

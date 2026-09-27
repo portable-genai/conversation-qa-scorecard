@@ -63,8 +63,9 @@ resource "google_model_armor_template" "guardrail" {
 
   # Required by the API even though every field inside it is optional: creating the template
   # without this block succeeds, and the NEXT apply then fails with "The 'template_metadata'
-  # field is required" while trying to remove what the service itself populated. Shipping it
-  # from the first apply avoids that entirely.
+  # field is required" while trying to remove what the service itself populated. Neither
+  # `terraform validate` nor the offline suite resolves the API's own field requirements, so this
+  # is only ever found by applying twice; shipping it from the first apply avoids that entirely.
   template_metadata {
     # Multi-language detection is a regional capability, refused the same way the malicious-URI
     # filter is, so it follows the same variable and the same disclosure.
@@ -74,6 +75,14 @@ resource "google_model_armor_template" "guardrail" {
         enable_multi_language_detection = true
       }
     }
+
+    # Stated false, which is also the API default, so nothing here asks the service to treat a
+    # screen where some filters were skipped or failed as complete. The application does not
+    # rely on this flag either way: adapters/gcp/guardrail.py allows only when
+    # invocation_result is SUCCESS, so a PARTIAL or FAILURE screen (a filter past its token
+    # limit, an unsupported language with multi-language detection off, a detector error) is
+    # refused even when it reports no match.
+    ignore_partial_invocation_failures = false
 
     # OFF, and this is the decision rather than the default. Sanitize-operation logs carry the
     # prompt/response text that was screened; the WORM audit trail (logging_worm.tf) already

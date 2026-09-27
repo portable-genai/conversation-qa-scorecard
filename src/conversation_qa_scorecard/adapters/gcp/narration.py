@@ -29,7 +29,7 @@ from hex_service_kit import provenance
 
 from ...config import Settings
 from ...domain.models import Narration
-from ...ports.narration import NarrationBrief
+from ...ports.narration import NarrationBrief, narration_prompt
 
 _SYSTEM_INSTRUCTION = (
     "You write one short paragraph for a contact-centre QA manager. You are given a scorecard "
@@ -60,7 +60,7 @@ class GeminiNarrator:
         client = genai.Client(vertexai=True, location=self._settings.region)
         reply = client.models.generate_content(
             model=model,
-            contents=json.dumps(_payload(brief), sort_keys=True),
+            contents=narration_prompt(brief),
             config={
                 "system_instruction": _SYSTEM_INSTRUCTION,
                 "response_mime_type": "application/json",
@@ -81,23 +81,6 @@ class GeminiNarrator:
             model=model,
             grounded=False,
         )
-
-
-def _payload(brief: NarrationBrief) -> dict[str, Any]:
-    """Exactly what the model sees: decided figures, already redacted, and nothing else."""
-    return {
-        "contact_id": brief.contact_id,
-        "market": brief.market,
-        "disposition": brief.disposition,
-        "severity": brief.severity,
-        "disclosure_score": brief.disclosure_score,
-        "adherence_score": brief.adherence_score,
-        "sentiment_score": brief.sentiment_score,
-        "failing_requirements": [list(item) for item in brief.failing_requirements],
-        "detected_cues": [list(item) for item in brief.detected_cues],
-        "citation_ids": list(brief.citation_ids),
-        "allowed_figures": sorted(brief.allowed_figures),
-    }
 
 
 def _parse(text: str) -> dict[str, Any] | None:  # pragma: no cover - needs live GCP

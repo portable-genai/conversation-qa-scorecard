@@ -205,6 +205,7 @@ def _service(*, with_model: bool) -> ScorecardService:
         transcripts=container.transcription,
         store=container.scorecard_store,
         review_router=container.review_router,
+        guardrail=container.guardrail,
         tracer=container.tracer,
         narrator=container.narration if with_model else None,
         classifier=container.signal_classifier if with_model else None,
@@ -288,6 +289,7 @@ def test_a_narrator_that_raises_does_not_fail_the_assessment() -> None:
         transcripts=container.transcription,
         store=container.scorecard_store,
         review_router=container.review_router,
+        guardrail=container.guardrail,
         tracer=container.tracer,
         narrator=_BrokenNarrator(),  # type: ignore[arg-type]
         classifier=None,

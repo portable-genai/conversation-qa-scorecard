@@ -23,6 +23,7 @@ answer was complete before the call.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
@@ -42,6 +43,19 @@ class SignalRequest:
     locale: str
     customer_utterances: tuple[str, ...]
     detected_cue_ids: tuple[str, ...] = ()
+
+
+def signal_prompt(request: SignalRequest) -> str:
+    """The prompt a model classifier is sent for ``request``: the exact string, not a rendering.
+
+    One definition, used by the managed adapter as its request ``contents`` and by the domain as
+    the text the guardrail's INPUT screen sees (rule R1), so what was screened is byte for byte
+    what the model reads: the locale and the redacted customer utterances, nothing else.
+    """
+    return json.dumps(
+        {"locale": request.locale, "customer_utterances": list(request.customer_utterances)},
+        sort_keys=True,
+    )
 
 
 @runtime_checkable
