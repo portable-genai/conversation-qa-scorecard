@@ -26,10 +26,8 @@ allowed_regions = ["asia-southeast1"]
 
 # ----------------------------------------------------------------------------- #
 # POSTURE A: quick evaluation (project-scoped, no org roles, fully destroyable).
-# NOT a compliant production deployment. Uncomment the three lines together.
+# NOT a compliant production deployment. Uncomment the line below.
 # ----------------------------------------------------------------------------- #
-# enable_org_policies = false
-# enable_vpc_sc       = false
 # worm_locked         = false
 
 # ----------------------------------------------------------------------------- #
@@ -102,3 +100,9 @@ review_routing_enabled = true
 # filter and multi-language detection are regional, and a region that does not serve
 # them refuses the WHOLE template, so the capabilities are stated, never inherited.
 model_armor_full_capabilities = false # asia-southeast1 refuses the malicious-URI filter; state true in a region that serves it
+
+# Slice 7 (2026-10-01): the perimeter and the org policies default OFF in code, so a
+# production deployment states them. A shared project states false in every stack but
+# the one that owns them.
+enable_vpc_sc = true
+enable_org_policies = true
