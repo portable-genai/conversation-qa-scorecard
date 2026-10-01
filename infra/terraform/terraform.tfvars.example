@@ -97,3 +97,8 @@ review_routing_enabled = true
 #   HUMAN_REVIEW_S2S_TOKEN       = { secret_id = "hrz7-outbound-s2s", version = "2" }
 #   HUMAN_REVIEW_S2S_SIGNING_KEY = { secret_id = "hrz7-actor-signing", version = "1" }
 # }
+
+# Rule R1: the Model Armor guardrail template (model_armor.tf). The malicious-URI
+# filter and multi-language detection are regional, and a region that does not serve
+# them refuses the WHOLE template, so the capabilities are stated, never inherited.
+model_armor_full_capabilities = false # asia-southeast1 refuses the malicious-URI filter; state true in a region that serves it
